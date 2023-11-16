@@ -241,6 +241,11 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
       fusedLocationClient.requestLocationUpdates(locationRequest,
         locationCallback,
         Looper.getMainLooper())
+
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val serviceIntent = Intent(binding.activity, GeofenceForegroundService::class.java)
+        binding.activity.applicationContext.startForegroundService(serviceIntent)
+      }
     }
 
     task.addOnFailureListener { exception ->
