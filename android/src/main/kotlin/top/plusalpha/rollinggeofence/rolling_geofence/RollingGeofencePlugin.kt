@@ -4,20 +4,32 @@ import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
+import com.google.android.gms.location.Priority
+import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.tasks.Task
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -40,6 +52,9 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
   private val geofenceList = mutableListOf<Geofence>()
 
   private lateinit var geofencePendingIntent: PendingIntent;
+
+  private lateinit var fusedLocationClient: FusedLocationProviderClient
+  private lateinit var locationCallback: LocationCallback
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "rolling_geofence")
@@ -73,16 +88,18 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
       .setCircularRegion(
         37.517636,
         126.931994,
-        200.0f,
+        500.0f,
       )
 
       // Set the expiration duration of the geofence. This geofence gets automatically
       // removed after this period of time.
       .setExpirationDuration(NEVER_EXPIRE)
+        .setLoiteringDelay(5000)
 
       // Set the transition types of interest. Alerts are only generated for these
       // transition. We track entry and exit transitions in this sample.
-      .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+      .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT or Geofence.GEOFENCE_TRANSITION_DWELL)
+        .setNotificationResponsiveness(5000)
 
       // Create the geofence.
       .build())
@@ -102,6 +119,14 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    fusedLocationClient = LocationServices.getFusedLocationProviderClient(binding.activity)
+    locationCallback = object : LocationCallback() {
+      override fun onLocationResult(locationResult: LocationResult) {
+        for (location in locationResult.locations){
+          Log.i("Geofence", location.toString())
+        }
+      }
+    }
     binding.addRequestPermissionsResultListener(this);
 
     when {
@@ -184,7 +209,7 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
     // addGeofences() and removeGeofences().
     geofencePendingIntent = PendingIntent.getBroadcast(
       binding.activity.applicationContext,
-      0,
+      2345,
       intent,
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
     )
@@ -200,6 +225,38 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("Geofence", "Add FAILED!!! $it")
       }
     }
+
+    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+      .build()
+    val builder = LocationSettingsRequest.Builder()
+      .addLocationRequest(locationRequest)
+    val client: SettingsClient = LocationServices.getSettingsClient(binding.activity)
+    val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+    task.addOnSuccessListener { locationSettingsResponse ->
+      // All location settings are satisfied. The client can initialize
+      // location requests here.
+      // ...
+      Log.i("Geofence", locationSettingsResponse.toString())
+
+      fusedLocationClient.requestLocationUpdates(locationRequest,
+        locationCallback,
+        Looper.getMainLooper())
+    }
+
+    task.addOnFailureListener { exception ->
+      if (exception is ResolvableApiException){
+        // Location settings are not satisfied, but this can be fixed
+        // by showing the user a dialog.
+        try {
+          // Show the dialog by calling startResolutionForResult(),
+          // and check the result in onActivityResult().
+          exception.startResolutionForResult(binding.activity,
+            1234)
+        } catch (sendEx: IntentSender.SendIntentException) {
+          // Ignore the error.
+        }
+      }
+    }
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -211,7 +268,7 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
   }
 
   override fun onDetachedFromActivity() {
-    TODO("Not yet implemented")
+    //TODO("Not yet implemented")
   }
 
   override fun onRequestPermissionsResult(

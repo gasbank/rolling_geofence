@@ -32,7 +32,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             // multiple geofences.
             val triggeringGeofences = geofencingEvent.triggeringGeofences
             if (triggeringGeofences != null) {
-                Log.i("Geofencing", triggeringGeofences.map { "${it.transitionTypes}: ${it.requestId}" }.joinToString { "\n" })
+                Log.i("Geofencing", triggeringGeofences.map { "${it.transitionTypes}: ${it.requestId}" }.joinToString { "***" })
             } else {
                 Log.i("Geofencing", "triggering geofences empty")
             }
