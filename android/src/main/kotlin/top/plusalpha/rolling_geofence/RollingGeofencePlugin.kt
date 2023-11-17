@@ -318,6 +318,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         permissions: Array<out String>,
         grantResults: IntArray
     ): Boolean {
-        TODO("Not yet implemented")
+        startLocationRequest(binding!!)
+        return true;
     }
 }
