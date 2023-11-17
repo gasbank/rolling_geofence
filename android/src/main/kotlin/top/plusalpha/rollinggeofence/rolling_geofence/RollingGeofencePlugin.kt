@@ -40,250 +40,284 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
 
-class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
-  PluginRegistry.RequestPermissionsResultListener {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
-  private lateinit var channel : MethodChannel
+class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
+    PluginRegistry.RequestPermissionsResultListener {
+    /// The MethodChannel that will the communication between Flutter and native Android
+    ///
+    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
+    /// when the Flutter Engine is detached from the Activity
+    private lateinit var channel: MethodChannel
 
-  private lateinit var geofencingClient: GeofencingClient
-  private val geofenceList = mutableListOf<Geofence>()
+    private lateinit var geofencingClient: GeofencingClient
+    private val geofenceList = mutableListOf<Geofence>()
 
-  private lateinit var geofencePendingIntent: PendingIntent;
+    private lateinit var geofencePendingIntent: PendingIntent;
 
-  private lateinit var fusedLocationClient: FusedLocationProviderClient
-  private lateinit var locationCallback: LocationCallback
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
 
-  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "rolling_geofence")
-    channel.setMethodCallHandler(this)
-  }
+    private var binding: ActivityPluginBinding? = null
 
-  override fun onMethodCall(call: MethodCall, result: Result) {
-    when (call.method) {
-        "getPlatformVersion" -> {
-          result.success("Android 으히히히 ${android.os.Build.VERSION.RELEASE}")
-        }
-        "registerGeofences" -> {
-          registerGeofences()
-          result.success("OK")
-        }
-        else -> {
-          result.notImplemented()
-        }
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "rolling_geofence")
+        channel.setMethodCallHandler(this)
     }
-  }
 
-  fun registerGeofences() {
-
-    geofenceList.add(
-      Geofence.Builder()
-      // Set the request ID of the geofence. This is a string to identify this
-      // geofence.
-      .setRequestId("office1235678")
-
-      // Set the circular region of this geofence.
-      .setCircularRegion(
-        37.517636,
-        126.931994,
-        200.0f,
-      )
-
-      // Set the expiration duration of the geofence. This geofence gets automatically
-      // removed after this period of time.
-      .setExpirationDuration(NEVER_EXPIRE)
-        .setLoiteringDelay(5000)
-
-      // Set the transition types of interest. Alerts are only generated for these
-      // transition. We track entry and exit transitions in this sample.
-      .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT or Geofence.GEOFENCE_TRANSITION_DWELL)
-        .setNotificationResponsiveness(5000)
-
-      // Create the geofence.
-      .build())
-
-
-  }
-
-  private fun getGeofencingRequest(): GeofencingRequest {
-    return GeofencingRequest.Builder().apply {
-      setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-      addGeofences(geofenceList)
-    }.build()
-  }
-
-  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
-  }
-
-  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-    fusedLocationClient = LocationServices.getFusedLocationProviderClient(binding.activity)
-    locationCallback = object : LocationCallback() {
-      override fun onLocationResult(locationResult: LocationResult) {
-        for (location in locationResult.locations){
-          Log.i("Location", location.toString())
-        }
-      }
-    }
-    binding.addRequestPermissionsResultListener(this);
-
-    when {
-      ContextCompat.checkSelfPermission(
-        binding.activity.applicationContext,
-        Manifest.permission.ACCESS_FINE_LOCATION
-      ) == PackageManager.PERMISSION_GRANTED -> {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-          when {
-            ContextCompat.checkSelfPermission(
-              binding.activity.applicationContext,
-              Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-              createGeofencingClient(binding)
+    override fun onMethodCall(call: MethodCall, result: Result) {
+        when (call.method) {
+            "getPlatformVersion" -> {
+                result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(
-              binding.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) -> {
-              // In an educational UI, explain to the user why your app requires this
-              // permission for a specific feature to behave as expected, and what
-              // features are disabled if it's declined. In this UI, include a
-              // "cancel" or "no thanks" button that lets the user continue
-              // using your app without granting the permission.
-              openApplicationDetailsSettings(binding)
+            "registerGeofence" -> {
+                if (call.argument<String>("name") == null || call.argument<Double>("latitude") == null || call.argument<Double>(
+                        "longitude"
+                    ) == null
+                ) {
+                    result.error("type mismatch", null, null)
+                }
+                registerGeofence(
+                    call.argument<String>("name")!!,
+                    call.argument<Double>("latitude")!!,
+                    call.argument<Double>("longitude")!!
+                )
+                result.success("OK")
+            }
+
+            "createGeofencingClient" -> {
+                createGeofencingClient(binding!!)
+                result.success("OK")
             }
 
             else -> {
-              // You can directly ask for the permission.
-
-              requestPermissions(
-                binding.activity,
-                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                1985
-              )
-
+                result.notImplemented()
             }
-          }
-        } else {
-          createGeofencingClient(binding)
         }
-      }
-      ActivityCompat.shouldShowRequestPermissionRationale(
-        binding.activity, Manifest.permission.ACCESS_FINE_LOCATION) -> {
-        // In an educational UI, explain to the user why your app requires this
-        // permission for a specific feature to behave as expected, and what
-        // features are disabled if it's declined. In this UI, include a
-        // "cancel" or "no thanks" button that lets the user continue
-        // using your app without granting the permission.
-        openApplicationDetailsSettings(binding)
-      }
-      else -> {
-        // You can directly ask for the permission.
-        requestPermissions(binding.activity,
-          arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-          1985)
-      }
     }
 
+    private fun registerGeofence(name: String, latitude: Double, longitude: Double) {
 
-  }
+        geofenceList.add(
+            Geofence.Builder()
+                // Set the request ID of the geofence. This is a string to identify this
+                // geofence.
+                .setRequestId(name)
 
-  private fun openApplicationDetailsSettings(binding: ActivityPluginBinding) {
-    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-    val uri = Uri.fromParts("package", binding.activity.packageName, null)
-    intent.data = uri
-    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-    startActivity(binding.activity.applicationContext, intent, null)
-  }
+                // Set the circular region of this geofence.
+                .setCircularRegion(
+                    latitude,
+                    longitude,
+                    200.0f,
+                )
 
-  private fun createGeofencingClient(binding: ActivityPluginBinding) {
-    // You can use the API that requires the permission.
-    geofencingClient = LocationServices.getGeofencingClient(binding.activity)
+                // Set the expiration duration of the geofence. This geofence gets automatically
+                // removed after this period of time.
+                .setExpirationDuration(NEVER_EXPIRE)
+                .setLoiteringDelay(5000)
 
-    registerGeofences();
+                // Set the transition types of interest. Alerts are only generated for these
+                // transition. We track entry and exit transitions in this sample.
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT or Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setNotificationResponsiveness(5000)
 
-    val intent = Intent(binding.activity, GeofenceBroadcastReceiver::class.java)
-    // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
-    // addGeofences() and removeGeofences().
-    geofencePendingIntent = PendingIntent.getBroadcast(
-      binding.activity.applicationContext,
-      2345,
-      intent,
-      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-    )
+                // Create the geofence.
+                .build()
+        )
 
-    geofencingClient.removeGeofences(geofencePendingIntent)
 
-    geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
-      addOnSuccessListener {
-        // Geofences added
-        // ...
-        Log.d("Geofence", "Add $it")
-      }
-      addOnFailureListener {
-        // Failed to add geofences
-        Log.d("Geofence", "Add FAILED!!! $it")
-      }
     }
 
-    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 60 * 1000)
-      .setMinUpdateDistanceMeters(200.0f)
-      .build()
-    val builder = LocationSettingsRequest.Builder()
-      .addLocationRequest(locationRequest)
-    val client: SettingsClient = LocationServices.getSettingsClient(binding.activity)
-    val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-    task.addOnSuccessListener { locationSettingsResponse ->
-      // All location settings are satisfied. The client can initialize
-      // location requests here.
-      // ...
-      Log.i("Geofence", locationSettingsResponse.toString())
-
-      fusedLocationClient.requestLocationUpdates(locationRequest,
-        locationCallback,
-        Looper.getMainLooper())
-
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val serviceIntent = Intent(binding.activity, GeofenceForegroundService::class.java)
-        binding.activity.applicationContext.startForegroundService(serviceIntent)
-      }
+    private fun getGeofencingRequest(): GeofencingRequest {
+        return GeofencingRequest.Builder().apply {
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofences(geofenceList)
+        }.build()
     }
 
-    task.addOnFailureListener { exception ->
-      if (exception is ResolvableApiException){
-        // Location settings are not satisfied, but this can be fixed
-        // by showing the user a dialog.
-        try {
-          // Show the dialog by calling startResolutionForResult(),
-          // and check the result in onActivityResult().
-          exception.startResolutionForResult(binding.activity,
-            1234)
-        } catch (sendEx: IntentSender.SendIntentException) {
-          // Ignore the error.
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel.setMethodCallHandler(null)
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        this.binding = binding
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(binding.activity)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    Log.i("Location", location.toString())
+                }
+            }
         }
-      }
+        binding.addRequestPermissionsResultListener(this);
+
+        when {
+            ContextCompat.checkSelfPermission(
+                binding.activity.applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    when {
+                        ContextCompat.checkSelfPermission(
+                            binding.activity.applicationContext,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED -> {
+                            startLocationRequest(binding)
+                            //createGeofencingClient(binding)
+                        }
+
+                        ActivityCompat.shouldShowRequestPermissionRationale(
+                            binding.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) -> {
+                            // In an educational UI, explain to the user why your app requires this
+                            // permission for a specific feature to behave as expected, and what
+                            // features are disabled if it's declined. In this UI, include a
+                            // "cancel" or "no thanks" button that lets the user continue
+                            // using your app without granting the permission.
+                            openApplicationDetailsSettings(binding)
+                        }
+
+                        else -> {
+                            // You can directly ask for the permission.
+
+                            requestPermissions(
+                                binding.activity,
+                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                1985
+                            )
+
+                        }
+                    }
+                } else {
+                    startLocationRequest(binding)
+                    //createGeofencingClient(binding)
+                }
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                binding.activity, Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
+                // In an educational UI, explain to the user why your app requires this
+                // permission for a specific feature to behave as expected, and what
+                // features are disabled if it's declined. In this UI, include a
+                // "cancel" or "no thanks" button that lets the user continue
+                // using your app without granting the permission.
+                openApplicationDetailsSettings(binding)
+            }
+
+            else -> {
+                // You can directly ask for the permission.
+                requestPermissions(
+                    binding.activity,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    1985
+                )
+            }
+        }
+
+
     }
-  }
 
-  override fun onDetachedFromActivityForConfigChanges() {
-    TODO("Not yet implemented")
-  }
+    private fun openApplicationDetailsSettings(binding: ActivityPluginBinding) {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", binding.activity.packageName, null)
+        intent.data = uri
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+        startActivity(binding.activity.applicationContext, intent, null)
+    }
 
-  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-    TODO("Not yet implemented")
-  }
+    private fun createGeofencingClient(binding: ActivityPluginBinding) {
+        // You can use the API that requires the permission.
+        geofencingClient = LocationServices.getGeofencingClient(binding.activity)
 
-  override fun onDetachedFromActivity() {
-    //TODO("Not yet implemented")
-  }
+        val intent = Intent(binding.activity, GeofenceBroadcastReceiver::class.java)
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
+        // addGeofences() and removeGeofences().
+        geofencePendingIntent = PendingIntent.getBroadcast(
+            binding.activity.applicationContext,
+            2345,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        )
 
-  override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<out String>,
-    grantResults: IntArray
-  ): Boolean {
-    TODO("Not yet implemented")
-  }
+        geofencingClient.removeGeofences(geofencePendingIntent)
+
+        geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
+            addOnSuccessListener {
+                // Geofences added
+                // ...
+                Log.d("Geofence", "Add $it")
+            }
+            addOnFailureListener {
+                // Failed to add geofences
+                Log.d("Geofence", "Add FAILED!!! $it")
+            }
+        }
+    }
+
+    private fun startLocationRequest(binding: ActivityPluginBinding) {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 60 * 1000)
+            .setMinUpdateDistanceMeters(200.0f)
+            .build()
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+        val client: SettingsClient = LocationServices.getSettingsClient(binding.activity)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+            Log.i("Geofence", locationSettingsResponse.toString())
+
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val serviceIntent = Intent(binding.activity, GeofenceForegroundService::class.java)
+                binding.activity.applicationContext.startForegroundService(serviceIntent)
+            }
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(
+                        binding.activity,
+                        1234
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+        }
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDetachedFromActivity() {
+        //TODO("Not yet implemented")
+        this.binding = null
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ): Boolean {
+        TODO("Not yet implemented")
+    }
 }

@@ -45,6 +45,14 @@ class _MyAppState extends State<MyApp> {
       platformVersion = 'Failed to get platform version.';
     }
 
+    await _rollingGeofencePlugin.registerGeofence(name: 'home', latitude: 37.5217, longitude: 126.9344);
+    await _rollingGeofencePlugin.registerGeofence(name: 'office1', latitude: 37.5275, longitude: 126.9165);
+    await _rollingGeofencePlugin.registerGeofence(name: 'office2', latitude: 37.4955, longitude: 126.8437);
+    await _rollingGeofencePlugin.registerGeofence(name: 'yoidostation', latitude: 37.5216, longitude: 126.9241);
+    await _rollingGeofencePlugin.registerGeofence(name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
+
+    await _rollingGeofencePlugin.createGeofencingClient();
+
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.

@@ -14,4 +14,20 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
     final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
   }
+
+  @override
+  Future<String?> registerGeofence({required String name, required double latitude, required double longitude}) async {
+    final ret = await methodChannel.invokeMethod<String>('registerGeofence', <String, dynamic>{
+      'name': name,
+      'latitude': latitude,
+      'longitude': longitude,
+    });
+    return ret;
+  }
+
+  @override
+  Future<String?> createGeofencingClient() async {
+    final version = await methodChannel.invokeMethod<String>('createGeofencingClient');
+    return version;
+  }
 }

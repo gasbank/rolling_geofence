@@ -26,4 +26,12 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<String?> registerGeofence({required String name, required double latitude, required double longitude}) {
+    throw UnimplementedError('registerGeofence() has not been implemented.');
+  }
+
+  Future<String?> createGeofencingClient() {
+    throw UnimplementedError('createGeofencingClient() has not been implemented.');
+  }
 }
