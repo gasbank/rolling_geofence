@@ -35,7 +35,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: top.plusalpha.rollinggeofence.rolling_geofence
+        package: top.plusalpha.rolling_geofence
         pluginClass: RollingGeofencePlugin
       ios:
         pluginClass: RollingGeofencePlugin

@@ -1,4 +1,4 @@
-group 'top.plusalpha.rollinggeofence.rolling_geofence'
+group 'top.plusalpha.rolling_geofence'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -26,7 +26,7 @@ apply plugin: 'kotlin-android'
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace 'top.plusalpha.rollinggeofence.rolling_geofence'
+        namespace 'top.plusalpha.rolling_geofence'
     }
 
     compileSdkVersion 33

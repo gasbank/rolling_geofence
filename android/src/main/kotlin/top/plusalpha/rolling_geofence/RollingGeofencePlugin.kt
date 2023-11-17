@@ -1,4 +1,4 @@
-package top.plusalpha.rollinggeofence.rolling_geofence
+package top.plusalpha.rolling_geofence
 
 import android.Manifest
 import android.app.PendingIntent

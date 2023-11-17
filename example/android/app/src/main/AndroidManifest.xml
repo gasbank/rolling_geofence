@@ -31,9 +31,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="top.plusalpha.rollinggeofence.rolling_geofence.GeofenceBroadcastReceiver"/>
+        <receiver android:name="top.plusalpha.rolling_geofence.GeofenceBroadcastReceiver"/>
         <service
-            android:name="top.plusalpha.rollinggeofence.rolling_geofence.GeofenceForegroundService"
+            android:name="top.plusalpha.rolling_geofence.GeofenceForegroundService"
             android:foregroundServiceType="location"
             android:exported="false">
         </service>

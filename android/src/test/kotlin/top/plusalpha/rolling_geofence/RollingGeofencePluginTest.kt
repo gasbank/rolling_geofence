@@ -1,4 +1,4 @@
-package top.plusalpha.rollinggeofence.rolling_geofence
+package top.plusalpha.rolling_geofence
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

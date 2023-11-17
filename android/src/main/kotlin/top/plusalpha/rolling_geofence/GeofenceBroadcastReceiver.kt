@@ -1,4 +1,4 @@
-package top.plusalpha.rollinggeofence.rolling_geofence
+package top.plusalpha.rolling_geofence
 
 import android.content.BroadcastReceiver
 import android.content.Context
