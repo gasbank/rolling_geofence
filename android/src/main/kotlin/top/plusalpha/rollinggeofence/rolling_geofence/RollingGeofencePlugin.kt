@@ -82,13 +82,13 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
       Geofence.Builder()
       // Set the request ID of the geofence. This is a string to identify this
       // geofence.
-      .setRequestId("office")
+      .setRequestId("office1235678")
 
       // Set the circular region of this geofence.
       .setCircularRegion(
         37.517636,
         126.931994,
-        500.0f,
+        200.0f,
       )
 
       // Set the expiration duration of the geofence. This geofence gets automatically
@@ -214,6 +214,8 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
     )
 
+    geofencingClient.removeGeofences(geofencePendingIntent)
+
     geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
       addOnSuccessListener {
         // Geofences added
@@ -226,7 +228,8 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
       }
     }
 
-    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 60 * 1000)
+      .setMinUpdateDistanceMeters(200.0f)
       .build()
     val builder = LocationSettingsRequest.Builder()
       .addLocationRequest(locationRequest)

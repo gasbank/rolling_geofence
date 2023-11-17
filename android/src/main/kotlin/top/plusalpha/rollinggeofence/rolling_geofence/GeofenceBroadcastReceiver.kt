@@ -7,6 +7,8 @@ import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -28,6 +30,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER || geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT || geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
 
+            Log.i("Geofencing", "Transition type: $geofenceTransition begin")
             // Get the geofences that were triggered. A single event can trigger
             // multiple geofences.
             val triggeringGeofences = geofencingEvent.triggeringGeofences
@@ -40,6 +43,19 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             } else {
                 Log.i("Geofencing", "triggering geofences empty")
             }
+            Log.i("Geofencing", "Transition type: $geofenceTransition end")
+
+            val engine = FlutterEngine(context!!)
+            val geofenceTransitionStr = when (geofenceTransition) {
+                Geofence.GEOFENCE_TRANSITION_ENTER -> "enter"
+                Geofence.GEOFENCE_TRANSITION_EXIT -> "exit"
+                Geofence.GEOFENCE_TRANSITION_DWELL -> "dwell"
+                else -> "unknown"
+            }
+            val requestIdList = triggeringGeofences?.map { it.requestId }.orEmpty()
+            val args = mutableListOf(geofenceTransitionStr)
+            args.addAll(requestIdList)
+            engine.dartExecutor.executeDartEntrypoint(DartExecutor.DartEntrypoint("lib/main.dart", "onGeofenceEvent"), args)
         } else {
             // Log the error.
             Log.e("Geofencing", "unknown transition event")

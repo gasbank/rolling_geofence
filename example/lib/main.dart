@@ -1,8 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:rolling_geofence/rolling_geofence.dart';
+
+@pragma('vm:entry-point')
+void onGeofenceEvent(List<String> args) {
+  if (kDebugMode) {
+    print('onGeofenceEvent: $args');
+  }
+}
 
 void main() {
   runApp(const MyApp());
