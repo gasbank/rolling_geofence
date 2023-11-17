@@ -10,6 +10,18 @@ class MockRollingGeofencePlatform
 
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<String?> createGeofencingClient() {
+    // TODO: implement createGeofencingClient
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> registerGeofence({required String name, required double latitude, required double longitude}) {
+    // TODO: implement registerGeofence
+    throw UnimplementedError();
+  }
 }
 
 void main() {
