@@ -123,7 +123,7 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
     locationCallback = object : LocationCallback() {
       override fun onLocationResult(locationResult: LocationResult) {
         for (location in locationResult.locations){
-          Log.i("Geofence", location.toString())
+          Log.i("Location", location.toString())
         }
       }
     }
@@ -226,7 +226,7 @@ class RollingGeofencePlugin: FlutterPlugin, MethodCallHandler, ActivityAware,
       }
     }
 
-    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
       .build()
     val builder = LocationSettingsRequest.Builder()
       .addLocationRequest(locationRequest)
