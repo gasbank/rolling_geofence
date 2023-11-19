@@ -45,13 +45,57 @@ class _MyAppState extends State<MyApp> {
       platformVersion = 'Failed to get platform version.';
     }
 
+    _rollingGeofencePlugin.setOnLocationPermissionAllowed(() async {
+      if (kDebugMode) {
+        print('Location permission allowed');
+      }
+
+      await _rollingGeofencePlugin.requestBackgroundLocationPermission();
+    });
+
+    _rollingGeofencePlugin.setOnLocationPermissionDenied(() {
+      if (kDebugMode) {
+        print('Error: Location permission denied');
+      }
+    });
+
+    _rollingGeofencePlugin.setOnBackgroundLocationPermissionAllowed(() async {
+      if (kDebugMode) {
+        print('Background location permission allowed');
+      }
+
+      await _rollingGeofencePlugin.startLocationRequest();
+    });
+
+    _rollingGeofencePlugin.setOnBackgroundLocationPermissionDenied(() {
+      if (kDebugMode) {
+        print('Error: Background location permission denied');
+      }
+    });
+
+    _rollingGeofencePlugin.setOnSuccess((code) {
+      if (kDebugMode) {
+        print('Success: $code');
+      }
+    });
+
+    _rollingGeofencePlugin.setOnError((code) {
+      if (kDebugMode) {
+        print('Error: $code');
+      }
+    });
+
     await _rollingGeofencePlugin.registerGeofence(name: 'home', latitude: 37.5217, longitude: 126.9344);
     await _rollingGeofencePlugin.registerGeofence(name: 'office1', latitude: 37.5275, longitude: 126.9165);
     await _rollingGeofencePlugin.registerGeofence(name: 'office2', latitude: 37.4955, longitude: 126.8437);
     await _rollingGeofencePlugin.registerGeofence(name: 'yoidostation', latitude: 37.5216, longitude: 126.9241);
     await _rollingGeofencePlugin.registerGeofence(name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
 
-    await _rollingGeofencePlugin.createGeofencingClient();
+    //await _rollingGeofencePlugin.createGeofencingClient();
+
+    await _rollingGeofencePlugin.requestLocationPermission();
+
+
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling

@@ -89,6 +89,21 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success("OK")
             }
 
+            "requestLocationPermission" -> {
+                requestLocationPermission(binding!!)
+                result.success("OK")
+            }
+
+            "requestBackgroundLocationPermission" -> {
+                requestBackgroundLocationPermission()
+                result.success("OK")
+            }
+
+            "startLocationRequest" -> {
+                startLocationRequest(binding!!)
+                result.success("OK")
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -151,72 +166,69 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
         binding.addRequestPermissionsResultListener(this);
 
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            ContextCompat.checkSelfPermission(
+//                binding.activity.applicationContext,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            )
+//
+//            requestPermissions(
+//                binding.activity,
+//                arrayOf(
+//                    Manifest.permission.ACCESS_FINE_LOCATION,
+//                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+//                ),
+//                1985
+//            )
+//        } else {
+//            requestPermissions(
+//                binding.activity,
+//                arrayOf(
+//                    Manifest.permission.ACCESS_FINE_LOCATION,
+//                ),
+//                1985
+//            )
+//        }
+
+        // 권한 요청 순서는 다음과 같이 한다.
+        //
+        // (1) Manifest.permission.ACCESS_FINE_LOCATION
+        // (2) Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        //
+        // 우선 (1)부터...
+        //requestLocationPermission(binding)
+    }
+
+    private fun requestLocationPermission(binding: ActivityPluginBinding) {
         when {
             ContextCompat.checkSelfPermission(
                 binding.activity.applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    when {
-                        ContextCompat.checkSelfPermission(
-                            binding.activity.applicationContext,
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED -> {
-                            startLocationRequest(binding)
-                            //createGeofencingClient(binding)
-                        }
-
-                        ActivityCompat.shouldShowRequestPermissionRationale(
-                            binding.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ) -> {
-                            // In an educational UI, explain to the user why your app requires this
-                            // permission for a specific feature to behave as expected, and what
-                            // features are disabled if it's declined. In this UI, include a
-                            // "cancel" or "no thanks" button that lets the user continue
-                            // using your app without granting the permission.
-                            openApplicationDetailsSettings(binding)
-                        }
-
-                        else -> {
-                            // You can directly ask for the permission.
-
-                            requestPermissions(
-                                binding.activity,
-                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                1985
-                            )
-
-                        }
-                    }
-                } else {
-                    startLocationRequest(binding)
-                    //createGeofencingClient(binding)
-                }
+                // 권한 허용된 상태이다. 다음 권한 요청한다.
+                requestBackgroundLocationPermission()
             }
 
             ActivityCompat.shouldShowRequestPermissionRationale(
                 binding.activity, Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
-                // In an educational UI, explain to the user why your app requires this
-                // permission for a specific feature to behave as expected, and what
-                // features are disabled if it's declined. In this UI, include a
-                // "cancel" or "no thanks" button that lets the user continue
-                // using your app without granting the permission.
+                // 권한 허용되지 않았고, 권한 허용이 필요한 이유에 대해 안내해야하는 창을 보여줘야 하는 단계이다.
                 openApplicationDetailsSettings(binding)
             }
 
             else -> {
-                // You can directly ask for the permission.
+                // 권한 허용되지 않은 상태이고, 직접 허용을 요청할 수 있는 단계이다.
+                // 요청하자!
                 requestPermissions(
                     binding.activity,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    1985
+                    arrayOf(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                    ),
+                    1000
                 )
             }
         }
-
-
     }
 
     private fun openApplicationDetailsSettings(binding: ActivityPluginBinding) {
@@ -248,10 +260,12 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 // Geofences added
                 // ...
                 Log.d("Geofence", "Add $it")
+                callSuccessCallback(2)
             }
             addOnFailureListener {
                 // Failed to add geofences
                 Log.d("Geofence", "Add FAILED!!! $it")
+                callErrorCallback(3)
             }
         }
     }
@@ -268,7 +282,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             // All location settings are satisfied. The client can initialize
             // location requests here.
             // ...
-            Log.i("Geofence", locationSettingsResponse.toString())
+            Log.i("Location", locationSettingsResponse.toString())
 
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
@@ -280,6 +294,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val serviceIntent = Intent(binding.activity, GeofenceForegroundService::class.java)
                 binding.activity.applicationContext.startForegroundService(serviceIntent)
             }
+
+            callSuccessCallback(1)
         }
 
         task.addOnFailureListener { exception ->
@@ -291,13 +307,17 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     // and check the result in onActivityResult().
                     exception.startResolutionForResult(
                         binding.activity,
-                        1234
+                        3000
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignore the error.
                 }
             }
+            callErrorCallback(4)
         }
+
+        // Geofence 서비스도 시작
+        createGeofencingClient(binding)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -318,7 +338,75 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         permissions: Array<out String>,
         grantResults: IntArray
     ): Boolean {
-        startLocationRequest(binding!!)
+        when (requestCode) {
+            // 위치 권한 설정 결과
+            1000 -> {
+                if (grantResults.all { it == 0 }) {
+                    channel.invokeMethod("onLocationPermissionAllowed", null)
+                } else {
+                    //val args: Map<String?, Any?> = HashMap()
+                    channel.invokeMethod("onLocationPermissionDenied", null)
+                }
+            }
+            // 백그라운드 위치 권한 설정 결과
+            2000 -> {
+                if (grantResults.all { it == 0 }) {
+                    channel.invokeMethod("onBackgroundLocationPermissionAllowed", null)
+                } else {
+                    //val args: Map<String?, Any?> = HashMap()
+                    channel.invokeMethod("onBackgroundLocationPermissionDenied", null)
+                }
+                //startLocationRequest(binding!!)
+            }
+            3000 -> {
+                callErrorCallback(2)
+            }
+        }
+
         return true;
+    }
+
+    private fun requestBackgroundLocationPermission() {
+        val context = binding!!.activity.applicationContext
+        when {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                startLocationRequest(binding!!)
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                binding!!.activity, Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
+                openApplicationDetailsSettings(binding!!)
+            }
+
+            else -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    requestPermissions(
+                        binding!!.activity,
+                        arrayOf(
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                        ),
+                        2000
+                    )
+                } else {
+                    callErrorCallback(1)
+                }
+            }
+        }
+    }
+
+    private fun callErrorCallback(code: Int) {
+        val args: MutableMap<String?, Any?> = HashMap()
+        args["code"] = code
+        channel.invokeMethod("onError", args)
+    }
+
+    private fun callSuccessCallback(code: Int) {
+        val args: MutableMap<String?, Any?> = HashMap()
+        args["code"] = code
+        channel.invokeMethod("onSuccess", args)
     }
 }

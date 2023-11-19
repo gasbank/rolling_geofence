@@ -22,6 +22,72 @@ class MockRollingGeofencePlatform
     // TODO: implement registerGeofence
     throw UnimplementedError();
   }
+
+  @override
+  Function(int p1)? onError;
+
+  @override
+  Function? onLocationPermissionAllowed;
+
+  @override
+  Function? onLocationPermissionDenied;
+
+  @override
+  Function(int p1)? onSuccess;
+
+  @override
+  Future<String?> requestBackgroundLocationPermission() {
+    // TODO: implement requestBackgroundLocationPermission
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> requestLocationPermission() {
+    // TODO: implement requestLocationPermission
+    throw UnimplementedError();
+  }
+
+  @override
+  void setOnError(Function(int p1) callback) {
+    // TODO: implement setOnError
+  }
+
+  @override
+  void setOnLocationPermissionAllowed(Function callback) {
+    // TODO: implement setOnLocationPermissionAllowed
+  }
+
+  @override
+  void setOnLocationPermissionDenied(Function callback) {
+    // TODO: implement setOnLocationPermissionDenied
+  }
+
+  @override
+  void setOnSuccess(Function(int p1) callback) {
+    // TODO: implement setOnSuccess
+  }
+
+  @override
+  Function? onBackgroundLocationPermissionAllowed;
+
+  @override
+  Function? onBackgroundLocationPermissionDenied;
+
+  @override
+  void setOnBackgroundLocationPermissionAllowed(Function callback) {
+    // TODO: implement setOnBackgroundLocationPermissionAllowed
+  }
+
+  @override
+  void setOnBackgroundLocationPermissionDenied(Function callback) {
+    // TODO: implement setOnBackgroundLocationPermissionDenied
+  }
+
+  @override
+  Future<String?> startLocationRequest() {
+    // TODO: implement startLocationRequest
+    throw UnimplementedError();
+  }
 }
 
 void main() {
