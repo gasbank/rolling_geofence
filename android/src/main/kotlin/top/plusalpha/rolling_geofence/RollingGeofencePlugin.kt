@@ -271,7 +271,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     private fun startLocationRequest(binding: ActivityPluginBinding) {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 60 * 1000)
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
             .setMinUpdateDistanceMeters(200.0f)
             .build()
         val builder = LocationSettingsRequest.Builder()
