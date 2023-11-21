@@ -290,10 +290,12 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 Looper.getMainLooper()
             )
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val serviceIntent = Intent(binding.activity, GeofenceForegroundService::class.java)
-                binding.activity.applicationContext.startForegroundService(serviceIntent)
-            }
+                // Foreground 서비스 시작 (테스트)
+
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                val serviceIntent = Intent(binding.activity, GeofenceForegroundService::class.java)
+//                binding.activity.applicationContext.startForegroundService(serviceIntent)
+//            }
 
             callSuccessCallback(1)
         }
@@ -315,9 +317,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             callErrorCallback(4)
         }
-
-        // Geofence 서비스도 시작
-        createGeofencingClient(binding)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {

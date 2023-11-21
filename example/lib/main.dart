@@ -39,8 +39,8 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _rollingGeofencePlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _rollingGeofencePlugin.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -64,7 +64,9 @@ class _MyAppState extends State<MyApp> {
         print('Background location permission allowed');
       }
 
-      await _rollingGeofencePlugin.startLocationRequest();
+      //await _rollingGeofencePlugin.startLocationRequest(); // 위치가 바뀔 때마다 좌표 콜백 받기
+      await _rollingGeofencePlugin
+          .createGeofencingClient(); // Geofence 변경 시에만 콜백 받기
     });
 
     _rollingGeofencePlugin.setOnBackgroundLocationPermissionDenied(() {
@@ -85,17 +87,20 @@ class _MyAppState extends State<MyApp> {
       }
     });
 
-    await _rollingGeofencePlugin.registerGeofence(name: 'home', latitude: 37.5217, longitude: 126.9344);
-    await _rollingGeofencePlugin.registerGeofence(name: 'office1', latitude: 37.5275, longitude: 126.9165);
-    await _rollingGeofencePlugin.registerGeofence(name: 'office2', latitude: 37.4955, longitude: 126.8437);
-    await _rollingGeofencePlugin.registerGeofence(name: 'yoidostation', latitude: 37.5216, longitude: 126.9241);
-    await _rollingGeofencePlugin.registerGeofence(name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
+    await _rollingGeofencePlugin.registerGeofence(
+        name: 'home', latitude: 37.5217, longitude: 126.9344);
+    await _rollingGeofencePlugin.registerGeofence(
+        name: 'office1', latitude: 37.5275, longitude: 126.9165);
+    await _rollingGeofencePlugin.registerGeofence(
+        name: 'office2', latitude: 37.4955, longitude: 126.8437);
+    await _rollingGeofencePlugin.registerGeofence(
+        name: 'yoidostation', latitude: 37.5216, longitude: 126.9241);
+    await _rollingGeofencePlugin.registerGeofence(
+        name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
 
     //await _rollingGeofencePlugin.createGeofencingClient();
 
     await _rollingGeofencePlugin.requestLocationPermission();
-
-
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
