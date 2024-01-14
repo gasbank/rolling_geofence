@@ -25,8 +25,12 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
 
   Function? onLocationPermissionAllowed;
   Function? onLocationPermissionDenied;
+  Function? onLocationPermissionAlreadyAllowed;
+
   Function? onBackgroundLocationPermissionAllowed;
   Function? onBackgroundLocationPermissionDenied;
+  Function? onBackgroundLocationPermissionAlreadyAllowed;
+
   Function(int)? onSuccess;
   Function(int)? onError;
 
@@ -35,23 +39,29 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   }
 
   Future<String?> requestBackgroundLocationPermission() {
-    throw UnimplementedError('requestBackgroundLocationPermission() has not been implemented.');
+    throw UnimplementedError(
+        'requestBackgroundLocationPermission() has not been implemented.');
   }
 
   Future<String?> startLocationRequest() {
-    throw UnimplementedError('startLocationRequest() has not been implemented.');
+    throw UnimplementedError(
+        'startLocationRequest() has not been implemented.');
   }
 
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('getPlatformVersion() has not been implemented.');
   }
 
-  Future<String?> registerGeofence({required String name, required double latitude, required double longitude}) {
+  Future<String?> registerGeofence(
+      {required String name,
+      required double latitude,
+      required double longitude}) {
     throw UnimplementedError('registerGeofence() has not been implemented.');
   }
 
   Future<String?> createGeofencingClient() {
-    throw UnimplementedError('createGeofencingClient() has not been implemented.');
+    throw UnimplementedError(
+        'createGeofencingClient() has not been implemented.');
   }
 
   void setOnLocationPermissionAllowed(Function callback) {
@@ -62,12 +72,20 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
     onLocationPermissionDenied = callback;
   }
 
+  void setOnLocationPermissionAlreadyAllowed(Function callback) {
+    onLocationPermissionAlreadyAllowed = callback;
+  }
+
   void setOnBackgroundLocationPermissionAllowed(Function callback) {
     onBackgroundLocationPermissionAllowed = callback;
   }
 
   void setOnBackgroundLocationPermissionDenied(Function callback) {
     onBackgroundLocationPermissionDenied = callback;
+  }
+
+  void setOnBackgroundLocationPermissionAlreadyAllowed(Function callback) {
+    onBackgroundLocationPermissionAlreadyAllowed = callback;
   }
 
   void setOnSuccess(Function(int) callback) {

@@ -8,7 +8,8 @@ class RollingGeofence {
   }
 
   Future<String?> requestBackgroundLocationPermission() {
-    return RollingGeofencePlatform.instance.requestBackgroundLocationPermission();
+    return RollingGeofencePlatform.instance
+        .requestBackgroundLocationPermission();
   }
 
   Future<String?> startLocationRequest() {
@@ -32,19 +33,33 @@ class RollingGeofence {
   }
 
   void setOnLocationPermissionAllowed(Function callback) {
-    return RollingGeofencePlatform.instance.setOnLocationPermissionAllowed(callback);
+    return RollingGeofencePlatform.instance
+        .setOnLocationPermissionAllowed(callback);
   }
 
   void setOnLocationPermissionDenied(Function callback) {
-    return RollingGeofencePlatform.instance.setOnLocationPermissionDenied(callback);
+    return RollingGeofencePlatform.instance
+        .setOnLocationPermissionDenied(callback);
+  }
+
+  void setOnLocationPermissionAlreadyAllowed(Function callback) {
+    return RollingGeofencePlatform.instance
+        .setOnLocationPermissionAlreadyAllowed(callback);
   }
 
   void setOnBackgroundLocationPermissionAllowed(Function callback) {
-    return RollingGeofencePlatform.instance.setOnBackgroundLocationPermissionAllowed(callback);
+    return RollingGeofencePlatform.instance
+        .setOnBackgroundLocationPermissionAllowed(callback);
   }
 
   void setOnBackgroundLocationPermissionDenied(Function callback) {
-    return RollingGeofencePlatform.instance.setOnBackgroundLocationPermissionDenied(callback);
+    return RollingGeofencePlatform.instance
+        .setOnBackgroundLocationPermissionDenied(callback);
+  }
+
+  void setOnBackgroundLocationPermissionAlreadyAllowed(Function callback) {
+    return RollingGeofencePlatform.instance
+        .setOnBackgroundLocationPermissionAlreadyAllowed(callback);
   }
 
   void setOnSuccess(Function(int) callback) {

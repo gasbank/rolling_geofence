@@ -7,7 +7,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockRollingGeofencePlatform
     with MockPlatformInterfaceMixin
     implements RollingGeofencePlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 
@@ -18,19 +17,28 @@ class MockRollingGeofencePlatform
   }
 
   @override
-  Future<String?> registerGeofence({required String name, required double latitude, required double longitude}) {
+  Future<String?> registerGeofence(
+      {required String name,
+      required double latitude,
+      required double longitude}) {
     // TODO: implement registerGeofence
     throw UnimplementedError();
   }
-
-  @override
-  Function(int p1)? onError;
 
   @override
   Function? onLocationPermissionAllowed;
 
   @override
   Function? onLocationPermissionDenied;
+
+  @override
+  Function? onBackgroundLocationPermissionAllowed;
+
+  @override
+  Function? onBackgroundLocationPermissionDenied;
+
+  @override
+  Function(int p1)? onError;
 
   @override
   Function(int p1)? onSuccess;
@@ -68,12 +76,6 @@ class MockRollingGeofencePlatform
   }
 
   @override
-  Function? onBackgroundLocationPermissionAllowed;
-
-  @override
-  Function? onBackgroundLocationPermissionDenied;
-
-  @override
   void setOnBackgroundLocationPermissionAllowed(Function callback) {
     // TODO: implement setOnBackgroundLocationPermissionAllowed
   }
@@ -88,10 +90,27 @@ class MockRollingGeofencePlatform
     // TODO: implement startLocationRequest
     throw UnimplementedError();
   }
+
+  @override
+  Function? onBackgroundLocationPermissionAlreadyAllowed;
+
+  @override
+  Function? onLocationPermissionAlreadyAllowed;
+
+  @override
+  void setOnBackgroundLocationPermissionAlreadyAllowed(Function callback) {
+    // TODO: implement setOnBackgroundLocationPermissionAlreadyAllowed
+  }
+
+  @override
+  void setOnLocationPermissionAlreadyAllowed(Function callback) {
+    // TODO: implement setOnLocationPermissionAlreadyAllowed
+  }
 }
 
 void main() {
-  final RollingGeofencePlatform initialPlatform = RollingGeofencePlatform.instance;
+  final RollingGeofencePlatform initialPlatform =
+      RollingGeofencePlatform.instance;
 
   test('$MethodChannelRollingGeofence is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelRollingGeofence>());

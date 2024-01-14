@@ -59,20 +59,35 @@ class _MyAppState extends State<MyApp> {
       }
     });
 
+    _rollingGeofencePlugin.setOnLocationPermissionAlreadyAllowed(() async {
+      if (kDebugMode) {
+        print('Location permission already allowed');
+      }
+
+      await _rollingGeofencePlugin.requestBackgroundLocationPermission();
+    });
+
     _rollingGeofencePlugin.setOnBackgroundLocationPermissionAllowed(() async {
       if (kDebugMode) {
         print('Background location permission allowed');
       }
 
-      //await _rollingGeofencePlugin.startLocationRequest(); // 위치가 바뀔 때마다 좌표 콜백 받기
-      await _rollingGeofencePlugin
-          .createGeofencingClient(); // Geofence 변경 시에만 콜백 받기
+      await _rollingGeofencePlugin.createGeofencingClient();
     });
 
     _rollingGeofencePlugin.setOnBackgroundLocationPermissionDenied(() {
       if (kDebugMode) {
         print('Error: Background location permission denied');
       }
+    });
+
+    _rollingGeofencePlugin
+        .setOnBackgroundLocationPermissionAlreadyAllowed(() async {
+      if (kDebugMode) {
+        print('Background location permission already allowed');
+      }
+
+      await _rollingGeofencePlugin.createGeofencingClient();
     });
 
     _rollingGeofencePlugin.setOnSuccess((code) {
@@ -100,7 +115,7 @@ class _MyAppState extends State<MyApp> {
 
     //await _rollingGeofencePlugin.createGeofencingClient();
 
-    await _rollingGeofencePlugin.requestLocationPermission();
+    //await _requestLocationPermission();
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -112,6 +127,10 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _requestLocationPermission() async {
+    await _rollingGeofencePlugin.requestLocationPermission();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -120,7 +139,15 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Running on: $_platformVersion\n'),
+              TextButton(
+                  onPressed: _requestLocationPermission,
+                  child: const Text('권한 요청!')),
+            ],
+          ),
         ),
       ),
     );
