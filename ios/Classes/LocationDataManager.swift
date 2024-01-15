@@ -7,14 +7,19 @@
 
 import Foundation
 import CoreLocation
+import Flutter
 
 class LocationDataManager : NSObject, CLLocationManagerDelegate {
     var locationManager = CLLocationManager()
-    
+    var channel: FlutterMethodChannel?
     
     override init() {
         super.init()
         locationManager.delegate = self
+    }
+    
+    func setChannel(channel: FlutterMethodChannel) {
+        self.channel = channel
     }
     
     // Location-related properties and delegate methods.
@@ -62,7 +67,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     
     func requestPermission() {
         if #available(iOS 14.0, *) {
-            NSLog("RollingGeofence: requestPermission - manager.authorizationStatus = \(locationManager.authorizationStatus)")
+            NSLog("\nRollingGeofence: requestPermission - manager.authorizationStatus = \(locationManager.authorizationStatus)")
         } else {
             // Fallback on earlier versions
         }
@@ -74,6 +79,9 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             let identifier = region.identifier
             NSLog("RollingGeofence: Enter to '\(identifier)'")
             
+            if channel != nil {
+                channel?.invokeMethod("onDidEnterRegionIos", arguments: ["name": identifier])
+            }
             //triggerTaskAssociatedWithRegionIdentifier(regionID: identifier)
         }
     }
@@ -82,6 +90,11 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
         if let region = region as? CLCircularRegion {
             let identifier = region.identifier
             NSLog("RollingGeofence: Exit from '\(identifier)'")
+            
+            if channel != nil {
+                channel?.invokeMethod("onDidExitRegionIos", arguments: ["name": identifier])
+            }
+
             //triggerTaskAssociatedWithRegionIdentifier(regionID: identifier)
         }
     }

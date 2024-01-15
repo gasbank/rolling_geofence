@@ -31,6 +31,9 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   Function? onBackgroundLocationPermissionDenied;
   Function? onBackgroundLocationPermissionAlreadyAllowed;
 
+  Function(String)? onDidEnterRegionIos;
+  Function(String)? onDidExitRegionIos;
+
   Function(int)? onSuccess;
   Function(int)? onError;
 
@@ -94,5 +97,13 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
 
   void setOnError(Function(int) callback) {
     onError = callback;
+  }
+
+  void setOnDidEnterRegionIos(Function(String) callback) {
+    onDidEnterRegionIos = callback;
+  }
+
+  void setOnDidExitRegionIos(Function(String) callback) {
+    onDidExitRegionIos = callback;
   }
 }

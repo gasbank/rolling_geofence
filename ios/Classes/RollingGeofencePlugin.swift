@@ -9,6 +9,7 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
         let channel = FlutterMethodChannel(name: "rolling_geofence", binaryMessenger: registrar.messenger())
         let instance = RollingGeofencePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
+        instance.locationDataManager.setChannel(channel: channel)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

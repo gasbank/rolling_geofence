@@ -102,6 +102,18 @@ class _MyAppState extends State<MyApp> {
       }
     });
 
+    _rollingGeofencePlugin.setOnDidEnterRegionIos((name) {
+      if (kDebugMode) {
+        print('OnDidEnterRegionIos: $name');
+      }
+    });
+
+    _rollingGeofencePlugin.setOnDidExitRegionIos((name) {
+      if (kDebugMode) {
+        print('OnDidExitRegionIos: $name');
+      }
+    });
+
     await _rollingGeofencePlugin.registerGeofence(
         name: 'home', latitude: 37.5217, longitude: 126.9344);
     await _rollingGeofencePlugin.registerGeofence(

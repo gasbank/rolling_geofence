@@ -60,6 +60,16 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
             onError!(call.arguments['code']);
           }
           break;
+        case "onDidEnterRegionIos":
+          if (onDidEnterRegionIos != null) {
+            onDidEnterRegionIos!(call.arguments["name"]);
+          }
+          break;
+        case "onDidExitRegionIos":
+          if (onDidExitRegionIos != null) {
+            onDidExitRegionIos!(call.arguments["name"]);
+          }
+          break;
       }
 
       return SynchronousFuture(null);

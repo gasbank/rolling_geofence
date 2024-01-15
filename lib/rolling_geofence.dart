@@ -67,4 +67,12 @@ class RollingGeofence {
   void setOnError(Function(int) callback) {
     return RollingGeofencePlatform.instance.setOnError(callback);
   }
+
+  void setOnDidEnterRegionIos(Function(String) callback) {
+    return RollingGeofencePlatform.instance.setOnDidEnterRegionIos(callback);
+  }
+
+  void setOnDidExitRegionIos(Function(String) callback) {
+    return RollingGeofencePlatform.instance.setOnDidExitRegionIos(callback);
+  }
 }
