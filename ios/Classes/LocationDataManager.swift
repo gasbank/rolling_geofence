@@ -36,7 +36,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     
     @available(iOS 14.0, *)
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        NSLog("RollingGeofence: manager.authorizationStatus = \(manager.authorizationStatus)")
+        NSLog("RollingGeofence: locationManagerDidChangeAuthorization - manager.authorizationStatus = \(manager.authorizationStatus)")
         
         switch manager.authorizationStatus {
         case .authorizedWhenInUse:  // Location services are available.
@@ -61,6 +61,11 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     }
     
     func requestPermission() {
+        if #available(iOS 14.0, *) {
+            NSLog("RollingGeofence: requestPermission - manager.authorizationStatus = \(locationManager.authorizationStatus)")
+        } else {
+            // Fallback on earlier versions
+        }
         locationManager.requestAlwaysAuthorization();
     }
     
