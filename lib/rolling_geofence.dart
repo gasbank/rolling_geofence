@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'rolling_geofence_platform_interface.dart';
 
 class RollingGeofence {

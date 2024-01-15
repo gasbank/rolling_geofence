@@ -15,6 +15,8 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
+        case "requestLocationPermission":
+            locationDataManager.requestPermission()
         case "registerGeofence":
             guard let argsMap = call.arguments as? Dictionary<String, Any>,
                   let name = argsMap["name"] as? String,
