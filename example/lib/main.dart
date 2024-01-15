@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:rolling_geofence/rolling_geofence.dart';
+import 'package:sphere_uniform_geocoding/sphere_uniform_geocoding.dart';
 
 @pragma('vm:entry-point')
 void onGeofenceEvent(List<String> args) {
@@ -145,21 +148,74 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    const subdivisionCount = 8192;
+    const pointLat = 37.5275;
+    const pointLng = 126.9165;
+    final segIndex = calculateSegmentIndexFromLatLng(
+        subdivisionCount, pointLat / 180 * pi, pointLng / 180 * pi);
+    final (centerLat, centerLng) =
+        calculateSegmentCenter(subdivisionCount, segIndex);
+    final neighborIndices =
+        getNeighborsOfSegmentIndex(subdivisionCount, segIndex);
+    final neighborLatLngList = neighborIndices.map((e) {
+      return calculateSegmentCenter(subdivisionCount, e);
+    });
+
+    const radius = 500.0;
+
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Rolling Geofence'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Running on: $_platformVersion\n'),
-              TextButton(
-                  onPressed: _requestLocationPermission,
-                  child: const Text('권한 요청!')),
-            ],
-          ),
+        body: ListView(
+          children: [
+            Text('Running on: $_platformVersion\n'),
+            TextButton(
+                onPressed: _requestLocationPermission,
+                child: const Text('권한 요청!')),
+            SizedBox(
+              width: 500,
+              height: 500,
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCenter:
+                      LatLng(centerLat / pi * 180, centerLng / pi * 180),
+                  initialZoom: 13,
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'top.plusalpha.rolling_geofence',
+                  ),
+                  CircleLayer(circles: [
+                    const CircleMarker(
+                        point: LatLng(pointLat, pointLng),
+                        radius: 100,
+                        useRadiusInMeter: true,
+                        color: Colors.red),
+                    CircleMarker(
+                        point:
+                            LatLng(centerLat / pi * 180, centerLng / pi * 180),
+                        radius: radius,
+                        useRadiusInMeter: true,
+                        borderStrokeWidth: 2,
+                        borderColor: Colors.deepOrange,
+                        color: Colors.transparent),
+                    for (final (neighborLat, neighborLng)
+                        in neighborLatLngList) ...[
+                      CircleMarker(
+                          point: LatLng(
+                              neighborLat / pi * 180, neighborLng / pi * 180),
+                          radius: radius,
+                          useRadiusInMeter: true,
+                          borderStrokeWidth: 2,
+                          borderColor: Colors.cyanAccent,
+                          color: Colors.transparent)
+                    ]
+                  ])
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
