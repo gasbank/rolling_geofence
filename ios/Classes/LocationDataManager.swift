@@ -17,9 +17,8 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
       locationManager.delegate = self
    }
 
-
    // Location-related properties and delegate methods.
-    func monitorRegionAtLocation(center: CLLocationCoordinate2D, identifier: String ) {
+    func monitorRegionAtLocation(center: CLLocationCoordinate2D, radius: CLLocationDistance, identifier: String) {
         // Make sure the devices supports region monitoring.
         if CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
             // Register the region.
@@ -31,7 +30,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             region.notifyOnExit = true
        
             locationManager.startMonitoring(for: region)
-            
+            NSLog("RollingGeofence: Start monitoring on '\(identifier)' (lat:\(center.latitude), lng:\(center.longitude))")
         }
     }
     
@@ -52,7 +51,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             
         case .authorizedAlways:
             
-            monitorRegionAtLocation(center: CLLocationCoordinate2D(latitude: 37.521021, longitude: 126.935059), identifier: "office")
+            monitorRegionAtLocation(center: CLLocationCoordinate2D(latitude: 37.521021, longitude: 126.935059), radius: 200, identifier: "office")
             
             break
             
