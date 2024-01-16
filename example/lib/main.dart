@@ -148,11 +148,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    const subdivisionCount = 8192;
-    const pointLat = 37.5275;
-    const pointLng = 126.9165;
+    const subdivisionCount = 14654;
+    const userPosLatDeg = 37.5275;
+    const userPosLngDeg = 126.9165;
     final segIndex = calculateSegmentIndexFromLatLng(
-        subdivisionCount, pointLat / 180 * pi, pointLng / 180 * pi);
+        subdivisionCount, userPosLatDeg / 180 * pi, userPosLngDeg / 180 * pi);
     final (centerLat, centerLng) =
         calculateSegmentCenter(subdivisionCount, segIndex);
     final neighborIndices =
@@ -161,7 +161,7 @@ class _MyAppState extends State<MyApp> {
       return calculateSegmentCenter(subdivisionCount, e);
     });
 
-    const radius = 500.0;
+    const geofenceRadius = 350.0;
 
     return MaterialApp(
       home: Scaffold(
@@ -178,7 +178,7 @@ class _MyAppState extends State<MyApp> {
                 options: MapOptions(
                   initialCenter:
                       LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                  initialZoom: 13,
+                  initialZoom: 14,
                 ),
                 children: [
                   TileLayer(
@@ -188,14 +188,14 @@ class _MyAppState extends State<MyApp> {
                   ),
                   CircleLayer(circles: [
                     const CircleMarker(
-                        point: LatLng(pointLat, pointLng),
-                        radius: 100,
+                        point: LatLng(userPosLatDeg, userPosLngDeg),
+                        radius: 20,
                         useRadiusInMeter: true,
                         color: Colors.red),
                     CircleMarker(
                         point:
                             LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                        radius: radius,
+                        radius: geofenceRadius,
                         useRadiusInMeter: true,
                         borderStrokeWidth: 2,
                         borderColor: Colors.deepOrange,
@@ -205,7 +205,7 @@ class _MyAppState extends State<MyApp> {
                       CircleMarker(
                           point: LatLng(
                               neighborLat / pi * 180, neighborLng / pi * 180),
-                          radius: radius,
+                          radius: geofenceRadius,
                           useRadiusInMeter: true,
                           borderStrokeWidth: 2,
                           borderColor: Colors.cyanAccent,
