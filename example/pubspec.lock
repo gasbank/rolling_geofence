@@ -105,10 +105,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: d4872660c46d929f6b8a9ef4e7a7eff7e49bbf0c4ec3f385ee32df5119175139
+      sha256: a2bbf9d017fcced29139daa8ed2bba4ece450ab222871df93ca9eec6f80c34ba
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.2.0"
   http_parser:
     dependency: transitive
     description:
@@ -267,7 +267,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: cbabc5d697a3d849d955b2e72ada8f7f2c8ff9e4
+      resolved-ref: "1d3840f0fd16aa0aef09f0c91e4f396bdb3da460"
       url: "https://github.com/gasbank/sphere_uniform_geocoding"
     source: git
     version: "0.0.1"

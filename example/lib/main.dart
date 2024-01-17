@@ -29,6 +29,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _rollingGeofencePlugin = RollingGeofence();
+  double _mapZoom = 14;
+  double _geofenceRadius = 350;
+  final _mapController = MapController();
 
   @override
   void initState() {
@@ -161,7 +164,19 @@ class _MyAppState extends State<MyApp> {
       return calculateSegmentCenter(subdivisionCount, e);
     });
 
-    const geofenceRadius = 350.0;
+    final centerCorners =
+        calculateSegmentCornersInLatLng(subdivisionCount, segIndex).map((e) {
+      final (lat, lng) = e;
+      return LatLng(lat / pi * 180, lng / pi * 180);
+    }).toList();
+
+    final neighborCorners = neighborIndices.map((e) {
+      final corners = calculateSegmentCornersInLatLng(subdivisionCount, e);
+      return corners.map((e) {
+        final (lat, lng) = e;
+        return LatLng(lat / pi * 180, lng / pi * 180);
+      }).toList();
+    });
 
     return MaterialApp(
       home: Scaffold(
@@ -175,10 +190,11 @@ class _MyAppState extends State<MyApp> {
               width: 500,
               height: 500,
               child: FlutterMap(
+                mapController: _mapController,
                 options: MapOptions(
                   initialCenter:
                       LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                  initialZoom: 14,
+                  initialZoom: _mapZoom,
                 ),
                 children: [
                   TileLayer(
@@ -186,6 +202,20 @@ class _MyAppState extends State<MyApp> {
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'top.plusalpha.rolling_geofence',
                   ),
+                  PolygonLayer(polygons: [
+                    Polygon(
+                      points: centerCorners,
+                      borderColor: Colors.black,
+                      borderStrokeWidth: 1,
+                    ),
+                    for (final neighborCorner in neighborCorners) ...[
+                      Polygon(
+                        points: neighborCorner,
+                        borderColor: Colors.black,
+                        borderStrokeWidth: 1,
+                      ),
+                    ],
+                  ]),
                   CircleLayer(circles: [
                     const CircleMarker(
                         point: LatLng(userPosLatDeg, userPosLngDeg),
@@ -195,7 +225,7 @@ class _MyAppState extends State<MyApp> {
                     CircleMarker(
                         point:
                             LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                        radius: geofenceRadius,
+                        radius: _geofenceRadius,
                         useRadiusInMeter: true,
                         borderStrokeWidth: 2,
                         borderColor: Colors.deepOrange,
@@ -205,7 +235,7 @@ class _MyAppState extends State<MyApp> {
                       CircleMarker(
                           point: LatLng(
                               neighborLat / pi * 180, neighborLng / pi * 180),
-                          radius: geofenceRadius,
+                          radius: _geofenceRadius,
                           useRadiusInMeter: true,
                           borderStrokeWidth: 2,
                           borderColor: Colors.cyanAccent,
@@ -214,7 +244,30 @@ class _MyAppState extends State<MyApp> {
                   ])
                 ],
               ),
-            )
+            ),
+            Text('Map Zoom: $_mapZoom'),
+            Slider(
+              value: _mapZoom,
+              onChanged: (double value) {
+                setState(() {
+                  _mapZoom = value;
+                  _mapController.move(_mapController.camera.center, value);
+                });
+              },
+              min: 1,
+              max: 20,
+            ),
+            Text('Geofence Radius: $_geofenceRadius'),
+            Slider(
+              value: _geofenceRadius,
+              onChanged: (double value) {
+                setState(() {
+                  _geofenceRadius = value;
+                });
+              },
+              min: 200,
+              max: 500,
+            ),
           ],
         ),
       ),
