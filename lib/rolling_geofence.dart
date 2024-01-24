@@ -26,6 +26,14 @@ class RollingGeofence {
         .registerGeofence(name: name, latitude: latitude, longitude: longitude);
   }
 
+  Future<String?> updateGeofence() {
+    return RollingGeofencePlatform.instance.updateGeofence();
+  }
+
+  Future<String?> clearGeofence() {
+    return RollingGeofencePlatform.instance.clearGeofence();
+  }
+
   Future<String?> createGeofencingClient() {
     return RollingGeofencePlatform.instance.createGeofencingClient();
   }

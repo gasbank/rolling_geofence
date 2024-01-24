@@ -84,6 +84,14 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success("OK")
             }
 
+            "updateGeofence" -> {
+                updateGeofence()
+            }
+
+            "clearGeofence" -> {
+                clearGeofence()
+            }
+
             "createGeofencingClient" -> {
                 createGeofencingClient(binding!!)
                 result.success("OK")
@@ -140,6 +148,27 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         )
 
 
+    }
+
+    private fun updateGeofence() {
+        geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
+            addOnSuccessListener {
+                // Geofences added
+                // ...
+                Log.d("Geofence", "Add $it")
+                callSuccessCallback(2)
+            }
+            addOnFailureListener {
+                // Failed to add geofences
+                Log.d("Geofence", "Add FAILED!!! $it")
+                callErrorCallback(3)
+            }
+        }
+    }
+
+    private fun clearGeofence() {
+        geofenceList.clear()
+        geofencingClient.removeGeofences(geofencePendingIntent)
     }
 
     private fun getGeofencingRequest(): GeofencingRequest {

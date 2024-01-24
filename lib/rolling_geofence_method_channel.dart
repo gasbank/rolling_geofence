@@ -119,6 +119,16 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   }
 
   @override
+  Future<String?> updateGeofence() async {
+    await methodChannel.invokeMethod('updateGeofence');
+  }
+
+  @override
+  Future<String?> clearGeofence() async {
+    await methodChannel.invokeMethod('clearGeofence');
+  }
+
+  @override
   Future<String?> createGeofencingClient() async {
     final ret =
         await methodChannel.invokeMethod<String>('createGeofencingClient');

@@ -62,6 +62,14 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
     throw UnimplementedError('registerGeofence() has not been implemented.');
   }
 
+  Future<String?> updateGeofence() {
+    throw UnimplementedError('updateGeofence() has not been implemented.');
+  }
+
+  Future<String?> clearGeofence() async {
+    throw UnimplementedError('updateGeofence() has not been implemented.');
+  }
+
   Future<String?> createGeofencingClient() {
     throw UnimplementedError(
         'createGeofencingClient() has not been implemented.');
