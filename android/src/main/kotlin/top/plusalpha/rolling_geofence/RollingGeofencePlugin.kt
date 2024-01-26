@@ -130,7 +130,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 .setCircularRegion(
                     latitude,
                     longitude,
-                    200.0f,
+                    350.0f,
                 )
 
                 // Set the expiration duration of the geofence. This geofence gets automatically
