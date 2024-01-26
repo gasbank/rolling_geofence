@@ -78,9 +78,14 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
 
   @override
   Future<String?> requestLocationPermission() async {
-    final ret =
-        await methodChannel.invokeMethod<String>('requestLocationPermission');
-    return ret;
+    try {
+      final ret =
+      await methodChannel.invokeMethod<String>('requestLocationPermission');
+
+      return ret;
+    } on PlatformException catch (e) {
+      return e.code;
+    }
   }
 
   @override

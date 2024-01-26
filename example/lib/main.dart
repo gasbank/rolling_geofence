@@ -145,8 +145,19 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> _requestLocationPermission() async {
-    await _rollingGeofencePlugin.requestLocationPermission();
+  Future<void> _requestLocationPermission(BuildContext context) async {
+    final result = await _rollingGeofencePlugin.requestLocationPermission();
+    final resultMsg = 'Request location permission result: $result';
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(resultMsg),
+      ));
+    }
+
+    if (kDebugMode) {
+      print(resultMsg);
+    }
   }
 
   @override
@@ -180,95 +191,99 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       home: Scaffold(
-        body: ListView(
-          children: [
-            Text('Running on: $_platformVersion\n'),
-            TextButton(
-                onPressed: _requestLocationPermission,
-                child: const Text('권한 요청!')),
-            SizedBox(
-              width: 500,
-              height: 500,
-              child: FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter:
-                      LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                  initialZoom: _mapZoom,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'top.plusalpha.rolling_geofence',
-                  ),
-                  PolygonLayer(polygons: [
-                    Polygon(
-                      points: centerCorners,
-                      borderColor: Colors.black,
-                      borderStrokeWidth: 1,
+        body: Builder(
+          builder: (context) {
+            return ListView(
+              children: [
+                Text('Running on: $_platformVersion\n'),
+                TextButton(
+                    onPressed: () => _requestLocationPermission(context),
+                    child: const Text('권한 요청!')),
+                SizedBox(
+                  width: 500,
+                  height: 500,
+                  child: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter:
+                          LatLng(centerLat / pi * 180, centerLng / pi * 180),
+                      initialZoom: _mapZoom,
                     ),
-                    for (final neighborCorner in neighborCorners) ...[
-                      Polygon(
-                        points: neighborCorner,
-                        borderColor: Colors.black,
-                        borderStrokeWidth: 1,
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'top.plusalpha.rolling_geofence',
                       ),
+                      PolygonLayer(polygons: [
+                        Polygon(
+                          points: centerCorners,
+                          borderColor: Colors.black,
+                          borderStrokeWidth: 1,
+                        ),
+                        for (final neighborCorner in neighborCorners) ...[
+                          Polygon(
+                            points: neighborCorner,
+                            borderColor: Colors.black,
+                            borderStrokeWidth: 1,
+                          ),
+                        ],
+                      ]),
+                      CircleLayer(circles: [
+                        const CircleMarker(
+                            point: LatLng(userPosLatDeg, userPosLngDeg),
+                            radius: 20,
+                            useRadiusInMeter: true,
+                            color: Colors.red),
+                        CircleMarker(
+                            point:
+                                LatLng(centerLat / pi * 180, centerLng / pi * 180),
+                            radius: _geofenceRadius,
+                            useRadiusInMeter: true,
+                            borderStrokeWidth: 2,
+                            borderColor: Colors.deepOrange,
+                            color: Colors.transparent),
+                        for (final (neighborLat, neighborLng)
+                            in neighborLatLngList) ...[
+                          CircleMarker(
+                              point: LatLng(
+                                  neighborLat / pi * 180, neighborLng / pi * 180),
+                              radius: _geofenceRadius,
+                              useRadiusInMeter: true,
+                              borderStrokeWidth: 2,
+                              borderColor: Colors.cyanAccent,
+                              color: Colors.transparent)
+                        ]
+                      ])
                     ],
-                  ]),
-                  CircleLayer(circles: [
-                    const CircleMarker(
-                        point: LatLng(userPosLatDeg, userPosLngDeg),
-                        radius: 20,
-                        useRadiusInMeter: true,
-                        color: Colors.red),
-                    CircleMarker(
-                        point:
-                            LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                        radius: _geofenceRadius,
-                        useRadiusInMeter: true,
-                        borderStrokeWidth: 2,
-                        borderColor: Colors.deepOrange,
-                        color: Colors.transparent),
-                    for (final (neighborLat, neighborLng)
-                        in neighborLatLngList) ...[
-                      CircleMarker(
-                          point: LatLng(
-                              neighborLat / pi * 180, neighborLng / pi * 180),
-                          radius: _geofenceRadius,
-                          useRadiusInMeter: true,
-                          borderStrokeWidth: 2,
-                          borderColor: Colors.cyanAccent,
-                          color: Colors.transparent)
-                    ]
-                  ])
-                ],
-              ),
-            ),
-            Text('Map Zoom: $_mapZoom'),
-            Slider(
-              value: _mapZoom,
-              onChanged: (double value) {
-                setState(() {
-                  _mapZoom = value;
-                  _mapController.move(_mapController.camera.center, value);
-                });
-              },
-              min: 1,
-              max: 20,
-            ),
-            Text('Geofence Radius: $_geofenceRadius'),
-            Slider(
-              value: _geofenceRadius,
-              onChanged: (double value) {
-                setState(() {
-                  _geofenceRadius = value;
-                });
-              },
-              min: 200,
-              max: 500,
-            ),
-          ],
+                  ),
+                ),
+                Text('Map Zoom: $_mapZoom'),
+                Slider(
+                  value: _mapZoom,
+                  onChanged: (double value) {
+                    setState(() {
+                      _mapZoom = value;
+                      _mapController.move(_mapController.camera.center, value);
+                    });
+                  },
+                  min: 1,
+                  max: 20,
+                ),
+                Text('Geofence Radius: $_geofenceRadius'),
+                Slider(
+                  value: _geofenceRadius,
+                  onChanged: (double value) {
+                    setState(() {
+                      _geofenceRadius = value;
+                    });
+                  },
+                  min: 200,
+                  max: 500,
+                ),
+              ],
+            );
+          }
         ),
       ),
     );
