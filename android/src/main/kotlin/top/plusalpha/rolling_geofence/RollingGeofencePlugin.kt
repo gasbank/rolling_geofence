@@ -102,13 +102,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "requestLocationPermission" -> {
+                // result는 함수 내에서 비동기적으로 처리한다.
                 requestLocationPermission(binding!!, result)
-                //result.success("OK")
             }
 
             "requestBackgroundLocationPermission" -> {
+                // result는 함수 내에서 비동기적으로 처리한다.
                 requestBackgroundLocationPermission(result)
-                result.success("OK")
             }
 
             "startLocationRequest" -> {
