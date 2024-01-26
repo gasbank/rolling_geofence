@@ -106,6 +106,34 @@ class MockRollingGeofencePlatform
   void setOnLocationPermissionAlreadyAllowed(Function callback) {
     // TODO: implement setOnLocationPermissionAlreadyAllowed
   }
+
+  @override
+  Function(String p1)? onDidEnterRegionIos;
+
+  @override
+  Function(String p1)? onDidExitRegionIos;
+
+  @override
+  Future<String?> clearGeofence() {
+    // TODO: implement clearGeofence
+    throw UnimplementedError();
+  }
+
+  @override
+  void setOnDidEnterRegionIos(Function(String p1) callback) {
+    // TODO: implement setOnDidEnterRegionIos
+  }
+
+  @override
+  void setOnDidExitRegionIos(Function(String p1) callback) {
+    // TODO: implement setOnDidExitRegionIos
+  }
+
+  @override
+  Future<String?> updateGeofence() {
+    // TODO: implement updateGeofence
+    throw UnimplementedError();
+  }
 }
 
 void main() {
