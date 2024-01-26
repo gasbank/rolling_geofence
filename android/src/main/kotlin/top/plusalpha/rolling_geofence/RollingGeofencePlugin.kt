@@ -2,6 +2,7 @@ package top.plusalpha.rolling_geofence
 
 import android.Manifest
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentSender
@@ -62,9 +63,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private var resultCallbackMap = HashMap<Int, Result>()
 
+    private var applicationContext: Context? = null
+
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "rolling_geofence")
         channel.setMethodCallHandler(this)
+
+        applicationContext = flutterPluginBinding.applicationContext
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -97,7 +102,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "createGeofencingClient" -> {
-                createGeofencingClient(binding!!)
+                if (applicationContext == null)
+                {
+                    result.error("ApplicationContextNull", null, null)
+                    return
+                }
+
+                createGeofencingClient(applicationContext!!)
                 result.success("OK")
             }
 
@@ -184,6 +195,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+
+        applicationContext = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -284,15 +297,15 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startActivity(binding.activity.applicationContext, intent, null)
     }
 
-    private fun createGeofencingClient(binding: ActivityPluginBinding) {
+    private fun createGeofencingClient(context: Context) {
         // You can use the API that requires the permission.
-        geofencingClient = LocationServices.getGeofencingClient(binding.activity)
+        geofencingClient = LocationServices.getGeofencingClient(context)
 
-        val intent = Intent(binding.activity, GeofenceBroadcastReceiver::class.java)
+        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
         // addGeofences() and removeGeofences().
         geofencePendingIntent = PendingIntent.getBroadcast(
-            binding.activity.applicationContext,
+            context,
             2345,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE

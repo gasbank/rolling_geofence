@@ -9,10 +9,16 @@ import 'package:rolling_geofence/rolling_geofence.dart';
 import 'package:sphere_uniform_geocoding/sphere_uniform_geocoding.dart';
 
 @pragma('vm:entry-point')
-void onGeofenceEvent(List<String> args) {
+void onGeofenceEvent(List<String> args) async {
   if (kDebugMode) {
     print('onGeofenceEvent: $args');
   }
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final rollingGeofencePlugin = RollingGeofence();
+  await rollingGeofencePlugin.createGeofencingClient();
+  await rollingGeofencePlugin.updateGeofence();
 }
 
 void main() {
@@ -199,6 +205,9 @@ class _MyAppState extends State<MyApp> {
                 TextButton(
                     onPressed: () => _requestLocationPermission(context),
                     child: const Text('권한 요청!')),
+                TextButton(
+                    onPressed: () => _createGeofencingClient(context),
+                    child: const Text('Geofencing Cilent 생성')),
                 SizedBox(
                   width: 500,
                   height: 500,
@@ -287,5 +296,9 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  void _createGeofencingClient(BuildContext context) async {
+    await _rollingGeofencePlugin.createGeofencingClient();
   }
 }
