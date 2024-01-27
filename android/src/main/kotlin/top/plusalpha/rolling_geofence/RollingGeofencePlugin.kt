@@ -241,8 +241,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 binding.activity.applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                // 권한 허용된 상태이다. 다음 권한 요청한다.
-                requestBackgroundLocationPermission(result)
+                // 권한 허용된 상태 굿!
+                result.success("OK")
             }
 
             ActivityCompat.shouldShowRequestPermissionRationale(
@@ -505,7 +505,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 context,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                startLocationRequest(binding!!.activity, result)
+                //startLocationRequest(binding!!.activity, result)
                 result.success("OK")
             }
 
@@ -524,20 +524,20 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 openApplicationDetailsSettings(binding!!)
             }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                binding!!.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) -> {
-                // 유저가 권한 부여 요청을 명시적으로 거부했다.
-                // 권한 허용이 필요한 이유에 대해 상세히 안내해야만 한다.
-
-                result.error(
-                    "BackgroundLocationPermissionActivelyRefused",
-                    "The user actively refused to allow background location permission",
-                    ""
-                )
-
-                openApplicationDetailsSettings(binding!!)
-            }
+//            ActivityCompat.shouldShowRequestPermissionRationale(
+//                binding!!.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+//            ) -> {
+//                // 유저가 권한 부여 요청을 명시적으로 거부했다.
+//                // 권한 허용이 필요한 이유에 대해 상세히 안내해야만 한다.
+//
+//                result.error(
+//                    "BackgroundLocationPermissionActivelyRefused",
+//                    "The user actively refused to allow background location permission",
+//                    ""
+//                )
+//
+//                openApplicationDetailsSettings(binding!!)
+//            }
 
             else -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

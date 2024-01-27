@@ -136,7 +136,7 @@ class MockRollingGeofencePlatform
   }
 
   @override
-  Future<String?> startSingleLocationRequest() {
+  Future<List<double>> startSingleLocationRequest() {
     // TODO: implement startSingleLocationRequest
     throw UnimplementedError();
   }

@@ -57,63 +57,6 @@ class _MyAppState extends State<MyApp> {
       platformVersion = 'Failed to get platform version.';
     }
 
-    _rollingGeofencePlugin.setOnLocationPermissionAllowed(() async {
-      if (kDebugMode) {
-        print('Location permission allowed');
-      }
-
-      await _rollingGeofencePlugin.requestBackgroundLocationPermission();
-    });
-
-    _rollingGeofencePlugin.setOnLocationPermissionDenied(() {
-      if (kDebugMode) {
-        print('Error: Location permission denied');
-      }
-    });
-
-    _rollingGeofencePlugin.setOnLocationPermissionAlreadyAllowed(() async {
-      if (kDebugMode) {
-        print('Location permission already allowed');
-      }
-
-      await _rollingGeofencePlugin.requestBackgroundLocationPermission();
-    });
-
-    _rollingGeofencePlugin.setOnBackgroundLocationPermissionAllowed(() async {
-      if (kDebugMode) {
-        print('Background location permission allowed');
-      }
-
-      await _rollingGeofencePlugin.createGeofencingClient();
-    });
-
-    _rollingGeofencePlugin.setOnBackgroundLocationPermissionDenied(() {
-      if (kDebugMode) {
-        print('Error: Background location permission denied');
-      }
-    });
-
-    _rollingGeofencePlugin
-        .setOnBackgroundLocationPermissionAlreadyAllowed(() async {
-      if (kDebugMode) {
-        print('Background location permission already allowed');
-      }
-
-      await _rollingGeofencePlugin.createGeofencingClient();
-    });
-
-    _rollingGeofencePlugin.setOnSuccess((code) {
-      if (kDebugMode) {
-        print('Success: $code');
-      }
-    });
-
-    _rollingGeofencePlugin.setOnError((code) {
-      if (kDebugMode) {
-        print('Error: $code');
-      }
-    });
-
     _rollingGeofencePlugin.setOnDidEnterRegionIos((name) {
       if (kDebugMode) {
         print('OnDidEnterRegionIos: $name');
@@ -137,14 +80,9 @@ class _MyAppState extends State<MyApp> {
     await _rollingGeofencePlugin.registerGeofence(
         name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
 
-    //await _rollingGeofencePlugin.createGeofencingClient();
-
-    //await _requestLocationPermission();
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     setState(() {
       _platformVersion = platformVersion;
@@ -152,8 +90,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _requestLocationPermission(BuildContext context) async {
-    final result = await _rollingGeofencePlugin.requestLocationPermission();
-    final resultMsg = 'Request location permission result: $result';
+    String? foregroundResult;
+
+    try {
+      foregroundResult =
+          await _rollingGeofencePlugin.requestLocationPermission();
+    } on PlatformException catch (e) {
+      foregroundResult = e.code;
+    }
+
+    final resultMsg =
+        'Request foreground location permission result: $foregroundResult';
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -163,6 +110,42 @@ class _MyAppState extends State<MyApp> {
 
     if (kDebugMode) {
       print(resultMsg);
+    }
+
+    // 포그라운드 위치 추적이 허용됐을 때만 백그라운드 위치 추적 권한을 요청하자.
+    // 'OK'면 예전에 허용했단 뜻이고, 'LocationPermissionAllowed'면 이번에 허용했단 뜻이다.
+    if (foregroundResult == 'OK' ||
+        foregroundResult == 'LocationPermissionAllowed') {
+      String? backgroundResult;
+      try {
+        backgroundResult =
+            await _rollingGeofencePlugin.requestBackgroundLocationPermission();
+      } on PlatformException catch (e) {
+        backgroundResult = e.code;
+      }
+
+      final resultMsg =
+          'Request background location permission result: $backgroundResult';
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(resultMsg),
+        ));
+      }
+
+      if (kDebugMode) {
+        print(resultMsg);
+      }
+
+      if (backgroundResult == 'OK' ||
+          backgroundResult == 'BackgroundLocationPermissionAllowed') {
+        // 필요한 모든 위치 권한을 획득했다!
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('필요한 모든 권환 획득 성공~!'),
+          ));
+        }
+      }
     }
   }
 
