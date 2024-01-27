@@ -1,6 +1,7 @@
 package top.plusalpha.rolling_geofence
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -51,31 +52,38 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
 
-    private lateinit var geofencingClient: GeofencingClient
+    private var applicationContext: Context? = null
+    private var geofencingClient: GeofencingClient? = null
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+
     private val geofenceList = mutableListOf<Geofence>()
 
-    private lateinit var geofencePendingIntent: PendingIntent;
-
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
+    private lateinit var geofencePendingIntent: PendingIntent
 
     private var binding: ActivityPluginBinding? = null
 
     private var resultCallbackMap = HashMap<Int, Result>()
-
-    private var applicationContext: Context? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "rolling_geofence")
         channel.setMethodCallHandler(this)
 
         applicationContext = flutterPluginBinding.applicationContext
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(flutterPluginBinding.applicationContext)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        // 초기화의 역순으로 리셋
+        fusedLocationClient = null
+        applicationContext = null
+
+        channel.setMethodCallHandler(null)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "getPlatformVersion" -> {
-                result.success("Android ${android.os.Build.VERSION.RELEASE}")
+                result.success("Android ${Build.VERSION.RELEASE}")
             }
 
             "registerGeofence" -> {
@@ -108,8 +116,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     return
                 }
 
-                createGeofencingClient(applicationContext!!)
-                result.success("OK")
+                // result는 함수 내에서 비동기적으로 처리한다.
+                createGeofencingClient(applicationContext!!, result)
             }
 
             "requestLocationPermission" -> {
@@ -123,8 +131,25 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "startLocationRequest" -> {
-                startLocationRequest(binding!!)
-                result.success("OK")
+                if (binding == null)
+                {
+                    result.error("ActivityPluginBindingNull", null, null)
+                    return
+                }
+
+                // result는 함수 내에서 비동기적으로 처리한다.
+                startLocationRequest(binding!!.activity, result)
+            }
+
+            "startSingleLocationRequest" -> {
+                if (applicationContext == null)
+                {
+                    result.error("ApplicationContextNull", null, null)
+                    return
+                }
+
+                // result는 함수 내에서 비동기적으로 처리한다.
+                startSingleLocationRequest(applicationContext!!, result)
             }
 
             else -> {
@@ -166,7 +191,12 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     private fun updateGeofence() {
-        geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
+        if (geofencingClient == null) {
+            Log.e("Geofence", "Geofencing client is not ready")
+            return
+        }
+
+        geofencingClient!!.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
             addOnSuccessListener {
                 // Geofences added
                 // ...
@@ -183,7 +213,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private fun clearGeofence() {
         geofenceList.clear()
-        geofencingClient.removeGeofences(geofencePendingIntent)
+
+        if (geofencingClient == null) {
+            Log.e("Geofence", "Geofencing client is not ready")
+            return
+        }
+
+        geofencingClient!!.removeGeofences(geofencePendingIntent)
     }
 
     private fun getGeofencingRequest(): GeofencingRequest {
@@ -193,56 +229,10 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }.build()
     }
 
-    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
-
-        applicationContext = null
-    }
-
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         this.binding = binding
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(binding.activity)
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations) {
-                    Log.i("Location", location.toString())
-                }
-            }
-        }
-        binding.addRequestPermissionsResultListener(this);
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            ContextCompat.checkSelfPermission(
-//                binding.activity.applicationContext,
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            )
-//
-//            requestPermissions(
-//                binding.activity,
-//                arrayOf(
-//                    Manifest.permission.ACCESS_FINE_LOCATION,
-//                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-//                ),
-//                1985
-//            )
-//        } else {
-//            requestPermissions(
-//                binding.activity,
-//                arrayOf(
-//                    Manifest.permission.ACCESS_FINE_LOCATION,
-//                ),
-//                1985
-//            )
-//        }
-
-        // 권한 요청 순서는 다음과 같이 한다.
-        //
-        // (1) Manifest.permission.ACCESS_FINE_LOCATION
-        // (2) Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        //
-        // 우선 (1)부터...
-        //requestLocationPermission(binding)
+        binding.addRequestPermissionsResultListener(this)
     }
 
     private fun requestLocationPermission(binding: ActivityPluginBinding, result: Result) {
@@ -297,7 +287,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startActivity(binding.activity.applicationContext, intent, null)
     }
 
-    private fun createGeofencingClient(context: Context) {
+    private fun createGeofencingClient(context: Context, result: Result) {
         // You can use the API that requires the permission.
         geofencingClient = LocationServices.getGeofencingClient(context)
 
@@ -311,31 +301,39 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
 
-        geofencingClient.removeGeofences(geofencePendingIntent)
+        geofencingClient!!.removeGeofences(geofencePendingIntent)
 
-        geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
+        geofencingClient!!.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
             addOnSuccessListener {
                 // Geofences added
                 // ...
                 Log.d("Geofence", "Add $it")
                 callSuccessCallback(2)
+                result.success("OK")
             }
             addOnFailureListener {
                 // Failed to add geofences
                 Log.d("Geofence", "Add FAILED!!! $it")
                 callErrorCallback(3)
+                result.error("AddGeofencesFailed", null, null)
             }
         }
     }
 
-    private fun startLocationRequest(binding: ActivityPluginBinding) {
+    private fun startLocationRequest(activity: Activity, result: Result) {
+        if (fusedLocationClient == null) {
+            Log.e("Geofence", "Fused location client is not ready")
+            result.error("FusedLocationClientNotReady", null, null)
+            return
+        }
+
         val locationRequest =
             LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
                 .setMinUpdateDistanceMeters(200.0f)
                 .build()
         val builder = LocationSettingsRequest.Builder()
             .addLocationRequest(locationRequest)
-        val client: SettingsClient = LocationServices.getSettingsClient(binding.activity)
+        val client: SettingsClient = LocationServices.getSettingsClient(activity)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
         task.addOnSuccessListener { locationSettingsResponse ->
             // All location settings are satisfied. The client can initialize
@@ -343,9 +341,15 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             // ...
             Log.i("Location", locationSettingsResponse.toString())
 
-            fusedLocationClient.requestLocationUpdates(
+            fusedLocationClient!!.requestLocationUpdates(
                 locationRequest,
-                locationCallback,
+                object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        for (location in locationResult.locations) {
+                            Log.i("Location", location.toString())
+                        }
+                    }
+                },
                 Looper.getMainLooper()
             )
 
@@ -357,6 +361,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 //            }
 
             callSuccessCallback(1)
+
+            result.success("OK")
         }
 
         task.addOnFailureListener { exception ->
@@ -367,7 +373,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
                     exception.startResolutionForResult(
-                        binding.activity,
+                        activity,
                         3000
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
@@ -375,6 +381,49 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
             callErrorCallback(4)
+            result.error("CheckLocationSettingsFailed", null, null)
+        }
+    }
+
+    private fun startSingleLocationRequest(context: Context, result: Result) {
+        if (fusedLocationClient == null) {
+            Log.e("Geofence", "Fused location client is not ready")
+            result.error("FusedLocationClientNotReady", null, null)
+            return
+        }
+
+        // 현재 위치를 딱 한번만 조회해서 result로 반환
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
+                .setMinUpdateDistanceMeters(200.0f)
+                .setMaxUpdates(1) // 딱 한번
+                .build()
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+        val client: SettingsClient = LocationServices.getSettingsClient(context)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+            Log.i("Location", locationSettingsResponse.toString())
+
+            fusedLocationClient!!.requestLocationUpdates(
+                locationRequest,
+                object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        result.success(locationResult.locations.joinToString { it.toString() })
+                    }
+                },
+                Looper.getMainLooper()
+            )
+
+            // 여기서 result 설정하지 말고 singleLocationCallback에서 결과 지정한다.
+            //result.success("OK")
+        }
+
+        task.addOnFailureListener {
+            result.error("CheckLocationSettingsFailed", null, null)
         }
     }
 
@@ -440,7 +489,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
         }
 
-        return true;
+        return true
     }
 
     private fun requestBackgroundLocationPermission(result: Result) {
@@ -450,7 +499,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 context,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                startLocationRequest(binding!!)
+                startLocationRequest(binding!!.activity, result)
                 result.success("OK")
             }
 
@@ -466,7 +515,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     ""
                 )
 
-                //openApplicationDetailsSettings(binding!!)
+                openApplicationDetailsSettings(binding!!)
             }
 
             ActivityCompat.shouldShowRequestPermissionRationale(
@@ -481,7 +530,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     ""
                 )
 
-                //openApplicationDetailsSettings(binding!!)
+                openApplicationDetailsSettings(binding!!)
             }
 
             else -> {

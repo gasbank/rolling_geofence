@@ -200,6 +200,7 @@ class _MyAppState extends State<MyApp> {
         body: Builder(
           builder: (context) {
             return ListView(
+              padding: const EdgeInsets.all(16),
               children: [
                 Text('Running on: $_platformVersion\n'),
                 TextButton(
@@ -207,7 +208,10 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('권한 요청!')),
                 TextButton(
                     onPressed: () => _createGeofencingClient(context),
-                    child: const Text('Geofencing Cilent 생성')),
+                    child: const Text('Geofencing Client 생성')),
+                TextButton(
+                    onPressed: () async => _rollingGeofencePlugin.startSingleLocationRequest(),
+                    child: const Text('현재 좌표 조회')),
                 SizedBox(
                   width: 500,
                   height: 500,
