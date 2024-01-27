@@ -12,54 +12,6 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   MethodChannelRollingGeofence() {
     methodChannel.setMethodCallHandler((call) {
       switch (call.method) {
-        // 위치 권한을 이번에 사용자가 허용했을 때 호출
-        case "onLocationPermissionAllowed":
-          if (onLocationPermissionAllowed != null) {
-            onLocationPermissionAllowed!();
-          }
-          break;
-        // 위치 권한을 이번에 사용자가 거절했을 때 호출
-        case "onLocationPermissionDenied":
-          if (onLocationPermissionDenied != null) {
-            onLocationPermissionDenied!();
-          }
-          break;
-        // 위치 권한이 이미 허용된 상태일 때 호출
-        case "onLocationPermissionAlreadyAllowed":
-          if (onLocationPermissionAlreadyAllowed != null) {
-            onLocationPermissionAlreadyAllowed!();
-          }
-          break;
-        // 백그라운드 위치 권한을 이번에 사용자가 허용했을 때 호출
-        case "onBackgroundLocationPermissionAllowed":
-          if (onBackgroundLocationPermissionAllowed != null) {
-            onBackgroundLocationPermissionAllowed!();
-          }
-          break;
-        // 백그라운드 위치 권한을 이번에 사용자가 거절했을 때 호출
-        case "onBackgroundLocationPermissionDenied":
-          if (onBackgroundLocationPermissionDenied != null) {
-            onBackgroundLocationPermissionDenied!();
-          }
-          break;
-        // 백그라운드 위치 권한이 이미 허용된 상태일 때 호출
-        case "onBackgroundLocationPermissionAlreadyAllowed":
-          if (onBackgroundLocationPermissionAlreadyAllowed != null) {
-            onBackgroundLocationPermissionAlreadyAllowed!();
-          }
-          break;
-        // 기타 성공 코드 알림
-        case "onSuccess":
-          if (onSuccess != null) {
-            onSuccess!(call.arguments['code']);
-          }
-          break;
-        // 기타 실패 코드 알림
-        case "onError":
-          if (onError != null) {
-            onError!(call.arguments['code']);
-          }
-          break;
         case "onDidEnterRegionIos":
           if (onDidEnterRegionIos != null) {
             onDidEnterRegionIos!(call.arguments["name"]);

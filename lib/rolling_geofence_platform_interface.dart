@@ -23,19 +23,8 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Function? onLocationPermissionAllowed;
-  Function? onLocationPermissionDenied;
-  Function? onLocationPermissionAlreadyAllowed;
-
-  Function? onBackgroundLocationPermissionAllowed;
-  Function? onBackgroundLocationPermissionDenied;
-  Function? onBackgroundLocationPermissionAlreadyAllowed;
-
   Function(String)? onDidEnterRegionIos;
   Function(String)? onDidExitRegionIos;
-
-  Function(int)? onSuccess;
-  Function(int)? onError;
 
   Future<String?> requestLocationPermission() {
     throw UnimplementedError('requestPermission() has not been implemented.');
@@ -78,38 +67,6 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   Future<String?> createGeofencingClient() {
     throw UnimplementedError(
         'createGeofencingClient() has not been implemented.');
-  }
-
-  void setOnLocationPermissionAllowed(Function callback) {
-    onLocationPermissionAllowed = callback;
-  }
-
-  void setOnLocationPermissionDenied(Function callback) {
-    onLocationPermissionDenied = callback;
-  }
-
-  void setOnLocationPermissionAlreadyAllowed(Function callback) {
-    onLocationPermissionAlreadyAllowed = callback;
-  }
-
-  void setOnBackgroundLocationPermissionAllowed(Function callback) {
-    onBackgroundLocationPermissionAllowed = callback;
-  }
-
-  void setOnBackgroundLocationPermissionDenied(Function callback) {
-    onBackgroundLocationPermissionDenied = callback;
-  }
-
-  void setOnBackgroundLocationPermissionAlreadyAllowed(Function callback) {
-    onBackgroundLocationPermissionAlreadyAllowed = callback;
-  }
-
-  void setOnSuccess(Function(int) callback) {
-    onSuccess = callback;
-  }
-
-  void setOnError(Function(int) callback) {
-    onError = callback;
   }
 
   void setOnDidEnterRegionIos(Function(String) callback) {

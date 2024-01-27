@@ -42,44 +42,6 @@ class RollingGeofence {
     return RollingGeofencePlatform.instance.createGeofencingClient();
   }
 
-  void setOnLocationPermissionAllowed(Function callback) {
-    return RollingGeofencePlatform.instance
-        .setOnLocationPermissionAllowed(callback);
-  }
-
-  void setOnLocationPermissionDenied(Function callback) {
-    return RollingGeofencePlatform.instance
-        .setOnLocationPermissionDenied(callback);
-  }
-
-  void setOnLocationPermissionAlreadyAllowed(Function callback) {
-    return RollingGeofencePlatform.instance
-        .setOnLocationPermissionAlreadyAllowed(callback);
-  }
-
-  void setOnBackgroundLocationPermissionAllowed(Function callback) {
-    return RollingGeofencePlatform.instance
-        .setOnBackgroundLocationPermissionAllowed(callback);
-  }
-
-  void setOnBackgroundLocationPermissionDenied(Function callback) {
-    return RollingGeofencePlatform.instance
-        .setOnBackgroundLocationPermissionDenied(callback);
-  }
-
-  void setOnBackgroundLocationPermissionAlreadyAllowed(Function callback) {
-    return RollingGeofencePlatform.instance
-        .setOnBackgroundLocationPermissionAlreadyAllowed(callback);
-  }
-
-  void setOnSuccess(Function(int) callback) {
-    return RollingGeofencePlatform.instance.setOnSuccess(callback);
-  }
-
-  void setOnError(Function(int) callback) {
-    return RollingGeofencePlatform.instance.setOnError(callback);
-  }
-
   void setOnDidEnterRegionIos(Function(String) callback) {
     return RollingGeofencePlatform.instance.setOnDidEnterRegionIos(callback);
   }

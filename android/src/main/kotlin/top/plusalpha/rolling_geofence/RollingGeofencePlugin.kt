@@ -201,12 +201,10 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 // Geofences added
                 // ...
                 Log.d("Geofence", "Add $it")
-                callSuccessCallback(2)
             }
             addOnFailureListener {
                 // Failed to add geofences
                 Log.d("Geofence", "Add FAILED!!! $it")
-                callErrorCallback(3)
             }
         }
     }
@@ -308,13 +306,11 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 // Geofences added
                 // ...
                 Log.d("Geofence", "Add $it")
-                callSuccessCallback(2)
                 result.success("OK")
             }
             addOnFailureListener {
                 // Failed to add geofences
                 Log.d("Geofence", "Add FAILED!!! $it")
-                callErrorCallback(3)
                 result.error("AddGeofencesFailed", null, null)
             }
         }
@@ -360,7 +356,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 //                binding.activity.applicationContext.startForegroundService(serviceIntent)
 //            }
 
-            callSuccessCallback(1)
 
             result.success("OK")
         }
@@ -380,7 +375,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     // Ignore the error.
                 }
             }
-            callErrorCallback(4)
             result.error("CheckLocationSettingsFailed", null, null)
         }
     }
@@ -455,12 +449,9 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             // 위치 권한 설정 결과
             FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.all { it == 0 }) {
-                    channel.invokeMethod("onLocationPermissionAllowed", null)
 
                     resultCallbackMap[FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.success("LocationPermissionAllowed")
                 } else {
-                    //val args: Map<String?, Any?> = HashMap()
-                    channel.invokeMethod("onLocationPermissionDenied", null)
 
                     resultCallbackMap[FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.error(
                         "LocationPermissionDenied",
@@ -473,12 +464,9 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             // 백그라운드 위치 권한 설정 결과
             BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.all { it == 0 }) {
-                    channel.invokeMethod("onBackgroundLocationPermissionAllowed", null)
 
                     resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.success("BackgroundLocationPermissionAllowed")
                 } else {
-                    //val args: Map<String?, Any?> = HashMap()
-                    channel.invokeMethod("onBackgroundLocationPermissionDenied", null)
 
                     resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.error(
                         "BackgroundLocationPermissionDenied",
@@ -491,7 +479,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             3000 -> {
-                callErrorCallback(2)
             }
         }
 
@@ -550,7 +537,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
                     )
                 } else {
-                    callErrorCallback(1)
                     result.error(
                         "BackgroundLocationFailedNotSupportedAndroidVersion",
                         "Android 10 or later version needed to use this function",
@@ -559,17 +545,5 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
         }
-    }
-
-    private fun callErrorCallback(code: Int) {
-        val args: MutableMap<String?, Any?> = HashMap()
-        args["code"] = code
-        channel.invokeMethod("onError", args)
-    }
-
-    private fun callSuccessCallback(code: Int) {
-        val args: MutableMap<String?, Any?> = HashMap()
-        args["code"] = code
-        channel.invokeMethod("onSuccess", args)
     }
 }
