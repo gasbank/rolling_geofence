@@ -51,7 +51,7 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
         'startLocationRequest() has not been implemented.');
   }
 
-  Future<String?> startSingleLocationRequest() {
+  Future<List<double>> startSingleLocationRequest() {
     throw UnimplementedError(
         'startSingleLocationRequest() has not been implemented.');
   }

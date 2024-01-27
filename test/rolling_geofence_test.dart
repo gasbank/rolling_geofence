@@ -134,6 +134,12 @@ class MockRollingGeofencePlatform
     // TODO: implement updateGeofence
     throw UnimplementedError();
   }
+
+  @override
+  Future<String?> startSingleLocationRequest() {
+    // TODO: implement startSingleLocationRequest
+    throw UnimplementedError();
+  }
 }
 
 void main() {

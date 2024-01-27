@@ -80,7 +80,7 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   Future<String?> requestLocationPermission() async {
     try {
       final ret =
-      await methodChannel.invokeMethod<String>('requestLocationPermission');
+          await methodChannel.invokeMethod<String>('requestLocationPermission');
 
       return ret;
     } on PlatformException catch (e) {
@@ -100,6 +100,12 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
     final ret =
         await methodChannel.invokeMethod<String>('startLocationRequest');
     return ret;
+  }
+
+  @override
+  Future<List<double>> startSingleLocationRequest() async {
+    final ret = await methodChannel.invokeMethod('startSingleLocationRequest');
+    return List<double>.from(ret ?? []);
   }
 
   @override

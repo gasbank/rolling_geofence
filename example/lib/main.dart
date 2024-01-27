@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -197,107 +197,117 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       home: Scaffold(
-        body: Builder(
-          builder: (context) {
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Text('Running on: $_platformVersion\n'),
-                TextButton(
-                    onPressed: () => _requestLocationPermission(context),
-                    child: const Text('권한 요청!')),
-                TextButton(
-                    onPressed: () => _createGeofencingClient(context),
-                    child: const Text('Geofencing Client 생성')),
-                TextButton(
-                    onPressed: () async => _rollingGeofencePlugin.startSingleLocationRequest(),
-                    child: const Text('현재 좌표 조회')),
-                SizedBox(
-                  width: 500,
-                  height: 500,
-                  child: FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      initialCenter:
-                          LatLng(centerLat / pi * 180, centerLng / pi * 180),
-                      initialZoom: _mapZoom,
+        body: Builder(builder: (context) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text('Running on: $_platformVersion\n'),
+              TextButton(
+                  onPressed: () => _requestLocationPermission(context),
+                  child: const Text('권한 요청!')),
+              TextButton(
+                  onPressed: () => _createGeofencingClient(context),
+                  child: const Text('Geofencing Client 생성')),
+              TextButton(
+                  onPressed: () async {
+                    final result = await _rollingGeofencePlugin
+                        .startSingleLocationRequest();
+                    final resultMsg = "Single Location Request Result: $result";
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(resultMsg),
+                      ));
+                    }
+                    if (kDebugMode) {
+                      print(resultMsg);
+                    }
+                  },
+                  child: const Text('현재 좌표 조회')),
+              SizedBox(
+                width: 500,
+                height: 500,
+                child: FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter:
+                        LatLng(centerLat / pi * 180, centerLng / pi * 180),
+                    initialZoom: _mapZoom,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'top.plusalpha.rolling_geofence',
                     ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'top.plusalpha.rolling_geofence',
+                    PolygonLayer(polygons: [
+                      Polygon(
+                        points: centerCorners,
+                        borderColor: Colors.black,
+                        borderStrokeWidth: 1,
                       ),
-                      PolygonLayer(polygons: [
+                      for (final neighborCorner in neighborCorners) ...[
                         Polygon(
-                          points: centerCorners,
+                          points: neighborCorner,
                           borderColor: Colors.black,
                           borderStrokeWidth: 1,
                         ),
-                        for (final neighborCorner in neighborCorners) ...[
-                          Polygon(
-                            points: neighborCorner,
-                            borderColor: Colors.black,
-                            borderStrokeWidth: 1,
-                          ),
-                        ],
-                      ]),
-                      CircleLayer(circles: [
-                        const CircleMarker(
-                            point: LatLng(userPosLatDeg, userPosLngDeg),
-                            radius: 20,
-                            useRadiusInMeter: true,
-                            color: Colors.red),
+                      ],
+                    ]),
+                    CircleLayer(circles: [
+                      const CircleMarker(
+                          point: LatLng(userPosLatDeg, userPosLngDeg),
+                          radius: 20,
+                          useRadiusInMeter: true,
+                          color: Colors.red),
+                      CircleMarker(
+                          point: LatLng(
+                              centerLat / pi * 180, centerLng / pi * 180),
+                          radius: _geofenceRadius,
+                          useRadiusInMeter: true,
+                          borderStrokeWidth: 2,
+                          borderColor: Colors.deepOrange,
+                          color: Colors.transparent),
+                      for (final (neighborLat, neighborLng)
+                          in neighborLatLngList) ...[
                         CircleMarker(
-                            point:
-                                LatLng(centerLat / pi * 180, centerLng / pi * 180),
+                            point: LatLng(
+                                neighborLat / pi * 180, neighborLng / pi * 180),
                             radius: _geofenceRadius,
                             useRadiusInMeter: true,
                             borderStrokeWidth: 2,
-                            borderColor: Colors.deepOrange,
-                            color: Colors.transparent),
-                        for (final (neighborLat, neighborLng)
-                            in neighborLatLngList) ...[
-                          CircleMarker(
-                              point: LatLng(
-                                  neighborLat / pi * 180, neighborLng / pi * 180),
-                              radius: _geofenceRadius,
-                              useRadiusInMeter: true,
-                              borderStrokeWidth: 2,
-                              borderColor: Colors.cyanAccent,
-                              color: Colors.transparent)
-                        ]
-                      ])
-                    ],
-                  ),
+                            borderColor: Colors.cyanAccent,
+                            color: Colors.transparent)
+                      ]
+                    ])
+                  ],
                 ),
-                Text('Map Zoom: $_mapZoom'),
-                Slider(
-                  value: _mapZoom,
-                  onChanged: (double value) {
-                    setState(() {
-                      _mapZoom = value;
-                      _mapController.move(_mapController.camera.center, value);
-                    });
-                  },
-                  min: 1,
-                  max: 20,
-                ),
-                Text('Geofence Radius: $_geofenceRadius'),
-                Slider(
-                  value: _geofenceRadius,
-                  onChanged: (double value) {
-                    setState(() {
-                      _geofenceRadius = value;
-                    });
-                  },
-                  min: 200,
-                  max: 500,
-                ),
-              ],
-            );
-          }
-        ),
+              ),
+              Text('Map Zoom: $_mapZoom'),
+              Slider(
+                value: _mapZoom,
+                onChanged: (double value) {
+                  setState(() {
+                    _mapZoom = value;
+                    _mapController.move(_mapController.camera.center, value);
+                  });
+                },
+                min: 1,
+                max: 20,
+              ),
+              Text('Geofence Radius: $_geofenceRadius'),
+              Slider(
+                value: _geofenceRadius,
+                onChanged: (double value) {
+                  setState(() {
+                    _geofenceRadius = value;
+                  });
+                },
+                min: 200,
+                max: 500,
+              ),
+            ],
+          );
+        }),
       ),
     );
   }

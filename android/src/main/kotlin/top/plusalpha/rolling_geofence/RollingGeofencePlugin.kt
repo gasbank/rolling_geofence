@@ -412,7 +412,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 locationRequest,
                 object : LocationCallback() {
                     override fun onLocationResult(locationResult: LocationResult) {
-                        result.success(locationResult.locations.joinToString { it.toString() })
+                        val doubleArrList = ArrayList<Double>()
+                        for (it in locationResult.locations) {
+                            doubleArrList.add(it.latitude)
+                            doubleArrList.add(it.longitude)
+                        }
+                        result.success(doubleArrList)
+                        //result.success(locationResult.locations.joinToString { it.toString() })
                     }
                 },
                 Looper.getMainLooper()

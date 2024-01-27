@@ -14,7 +14,7 @@ class RollingGeofence {
     return RollingGeofencePlatform.instance.startLocationRequest();
   }
 
-  Future<String?> startSingleLocationRequest() {
+  Future<List<double>> startSingleLocationRequest() {
     return RollingGeofencePlatform.instance.startSingleLocationRequest();
   }
 
