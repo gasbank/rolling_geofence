@@ -314,6 +314,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.error("AddGeofencesFailed", null, null)
             }
         }
+
+        geofenceList.clear()
     }
 
     private fun startLocationRequest(activity: Activity, result: Result) {
