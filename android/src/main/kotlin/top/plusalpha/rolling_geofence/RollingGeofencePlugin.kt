@@ -424,7 +424,17 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             //result.success("OK")
         }
 
-        task.addOnFailureListener {
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    exception.startResolutionForResult(
+                        (context as Activity)!!,
+                        3000
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
             result.error("CheckLocationSettingsFailed", null, null)
         }
     }
