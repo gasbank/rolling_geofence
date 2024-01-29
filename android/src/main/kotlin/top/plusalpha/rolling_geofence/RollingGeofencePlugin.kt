@@ -149,7 +149,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
 
                 // result는 함수 내에서 비동기적으로 처리한다.
-                startSingleLocationRequest(applicationContext!!, result)
+                startSingleLocationRequest(applicationContext!!, binding!!.activity, result)
             }
 
             else -> {
@@ -381,7 +381,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
-    private fun startSingleLocationRequest(context: Context, result: Result) {
+    private fun startSingleLocationRequest(context: Context, activity: Activity, result: Result) {
         if (fusedLocationClient == null) {
             Log.e("Geofence", "Fused location client is not ready")
             result.error("FusedLocationClientNotReady", null, null)
@@ -428,7 +428,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             if (exception is ResolvableApiException) {
                 try {
                     exception.startResolutionForResult(
-                        (context as Activity)!!,
+                        activity,
                         3000
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
