@@ -26,6 +26,10 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   Function(String)? onDidEnterRegionIos;
   Function(String)? onDidExitRegionIos;
 
+  Future<String?> requestLocationSetting() {
+    throw UnimplementedError('requestLocationSetting() has not been implemented.');
+  }
+
   Future<String?> requestLocationPermission() {
     throw UnimplementedError('requestPermission() has not been implemented.');
   }

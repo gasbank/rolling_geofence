@@ -120,6 +120,10 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 createGeofencingClient(applicationContext!!, result)
             }
 
+            "requestLocationSetting" -> {
+                requestLocationSetting(binding!!.activity, result)
+            }
+
             "requestLocationPermission" -> {
                 // result는 함수 내에서 비동기적으로 처리한다.
                 requestLocationPermission(binding!!, result)
@@ -231,6 +235,40 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         this.binding = binding
 
         binding.addRequestPermissionsResultListener(this)
+    }
+
+    private fun requestLocationSetting(activity: Activity, result: Result) {
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
+                .setMinUpdateDistanceMeters(200.0f)
+                .setMaxUpdates(1)
+                .build()
+
+        val builder =
+            LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest)
+
+        val client: SettingsClient = LocationServices.getSettingsClient(activity)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener { locationSettingsResponse ->
+            result.success("OK")
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException){
+                try {
+                    exception.startResolutionForResult(
+                        activity,
+                        3000
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+
+            result.success("Prompt the user to change location settings")
+        }
     }
 
     private fun requestLocationPermission(binding: ActivityPluginBinding, result: Result) {

@@ -1,6 +1,10 @@
 import 'rolling_geofence_platform_interface.dart';
 
 class RollingGeofence {
+  Future<String?> requestLocationSetting() {
+    return RollingGeofencePlatform.instance.requestLocationSetting();
+  }
+
   Future<String?> requestLocationPermission() {
     return RollingGeofencePlatform.instance.requestLocationPermission();
   }
