@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
@@ -69,7 +70,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         channel.setMethodCallHandler(this)
 
         applicationContext = flutterPluginBinding.applicationContext
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(flutterPluginBinding.applicationContext)
+        fusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(flutterPluginBinding.applicationContext)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -110,8 +112,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "createGeofencingClient" -> {
-                if (applicationContext == null)
-                {
+                if (applicationContext == null) {
                     result.error("ApplicationContextNull", null, null)
                     return
                 }
@@ -135,8 +136,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "startLocationRequest" -> {
-                if (binding == null)
-                {
+                if (binding == null) {
                     result.error("ActivityPluginBindingNull", null, null)
                     return
                 }
@@ -146,14 +146,29 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "startSingleLocationRequest" -> {
-                if (applicationContext == null)
-                {
+                if (applicationContext == null) {
                     result.error("ApplicationContextNull", null, null)
                     return
                 }
 
                 // result는 함수 내에서 비동기적으로 처리한다.
                 startSingleLocationRequest(applicationContext!!, result)
+            }
+
+            "checkLocationPermission" -> {
+                if (checkForegroundLocationPermission(applicationContext!!) == PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (checkBackgroundLocationPermission(applicationContext!!) == PackageManager.PERMISSION_GRANTED) {
+                            result.success("OK")
+                        } else {
+                            result.success("NoBackgroundLocationPermission")
+                        }
+                    } else {
+                        result.success("OK")
+                    }
+                } else {
+                    result.success("NoForegroundLocationPermission")
+                }
             }
 
             else -> {
@@ -179,8 +194,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                 // Set the expiration duration of the geofence. This geofence gets automatically
                 // removed after this period of time.
-                .setExpirationDuration(NEVER_EXPIRE)
-                .setLoiteringDelay(5000)
+                .setExpirationDuration(NEVER_EXPIRE).setLoiteringDelay(5000)
 
                 // Set the transition types of interest. Alerts are only generated for these
                 // transition. We track entry and exit transitions in this sample.
@@ -240,27 +254,22 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private fun requestLocationSetting(activity: Activity, result: Result) {
         val locationRequest =
             LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
-                .setMinUpdateDistanceMeters(200.0f)
-                .setMaxUpdates(1)
-                .build()
+                .setMinUpdateDistanceMeters(200.0f).setMaxUpdates(1).build()
 
-        val builder =
-            LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest)
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
 
         val client: SettingsClient = LocationServices.getSettingsClient(activity)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
-        task.addOnSuccessListener { locationSettingsResponse ->
+        task.addOnSuccessListener {
             result.success("OK")
         }
 
         task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException){
+            if (exception is ResolvableApiException) {
                 try {
                     exception.startResolutionForResult(
-                        activity,
-                        3000
+                        activity, 3000
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignore the error.
@@ -273,10 +282,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private fun requestLocationPermission(binding: ActivityPluginBinding, result: Result) {
         when {
-            ContextCompat.checkSelfPermission(
-                binding.activity.applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
+            checkForegroundLocationPermission(binding.activity.applicationContext) == PackageManager.PERMISSION_GRANTED -> {
                 // 권한 허용된 상태 굿!
                 result.success("OK")
             }
@@ -303,16 +309,19 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 resultCallbackMap[FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE] = result
 
                 requestPermissions(
-                    binding.activity,
-                    arrayOf(
+                    binding.activity, arrayOf(
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION,
-                    ),
-                    FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE
+                    ), FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE
                 )
             }
         }
     }
+
+    private fun checkForegroundLocationPermission(context: Context) =
+        ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        )
 
     // Android OS 레벨의 앱 별 App info 페이지를 열어준다.
     private fun openApplicationDetailsSettings(binding: ActivityPluginBinding) {
@@ -331,10 +340,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
         // addGeofences() and removeGeofences().
         geofencePendingIntent = PendingIntent.getBroadcast(
-            context,
-            2345,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            context, 2345, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
 
         geofencingClient!!.removeGeofences(geofencePendingIntent)
@@ -365,10 +371,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
         val locationRequest =
             LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
-                .setMinUpdateDistanceMeters(200.0f)
-                .build()
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
+                .setMinUpdateDistanceMeters(200.0f).build()
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(activity)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
         task.addOnSuccessListener { locationSettingsResponse ->
@@ -378,15 +382,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Log.i("Location", locationSettingsResponse.toString())
 
             fusedLocationClient!!.requestLocationUpdates(
-                locationRequest,
-                object : LocationCallback() {
+                locationRequest, object : LocationCallback() {
                     override fun onLocationResult(locationResult: LocationResult) {
                         for (location in locationResult.locations) {
                             Log.i("Location", location.toString())
                         }
                     }
-                },
-                Looper.getMainLooper()
+                }, Looper.getMainLooper()
             )
 
             // Foreground 서비스 시작 (테스트)
@@ -408,8 +410,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
                     exception.startResolutionForResult(
-                        activity,
-                        3000
+                        activity, 3000
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignore the error.
@@ -429,11 +430,9 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         // 현재 위치를 딱 한번만 조회해서 result로 반환
         val locationRequest =
             LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
-                .setMinUpdateDistanceMeters(200.0f)
-                .setMaxUpdates(1) // 딱 한번
+                .setMinUpdateDistanceMeters(200.0f).setMaxUpdates(1) // 딱 한번
                 .build()
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(context)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
         task.addOnSuccessListener { locationSettingsResponse ->
@@ -443,8 +442,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Log.i("Location", locationSettingsResponse.toString())
 
             fusedLocationClient!!.requestLocationUpdates(
-                locationRequest,
-                object : LocationCallback() {
+                locationRequest, object : LocationCallback() {
                     override fun onLocationResult(locationResult: LocationResult) {
                         val doubleArrList = ArrayList<Double>()
                         for (it in locationResult.locations) {
@@ -454,8 +452,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         result.success(doubleArrList)
                         //result.success(locationResult.locations.joinToString { it.toString() })
                     }
-                },
-                Looper.getMainLooper()
+                }, Looper.getMainLooper()
             )
 
             // 여기서 result 설정하지 말고 singleLocationCallback에서 결과 지정한다.
@@ -481,9 +478,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ): Boolean {
         when (requestCode) {
             // 위치 권한 설정 결과
@@ -527,63 +522,70 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private fun requestBackgroundLocationPermission(result: Result) {
         val context = binding!!.activity.applicationContext
-        when {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                //startLocationRequest(binding!!.activity, result)
-                result.success("OK")
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            when {
+                checkBackgroundLocationPermission(context) == PackageManager.PERMISSION_GRANTED -> {
+                    //startLocationRequest(binding!!.activity, result)
+                    result.success("OK")
+                }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                binding!!.activity, Manifest.permission.ACCESS_FINE_LOCATION
-            ) -> {
-                // 유저가 권한 부여 요청을 명시적으로 거부했다.
-                // 권한 허용이 필요한 이유에 대해 상세히 안내해야만 한다.
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    binding!!.activity, Manifest.permission.ACCESS_FINE_LOCATION
+                ) -> {
+                    // 유저가 권한 부여 요청을 명시적으로 거부했다.
+                    // 권한 허용이 필요한 이유에 대해 상세히 안내해야만 한다.
 
-                result.error(
-                    "BackgroundLocationPermissionActivelyRefused",
-                    "The user actively refused to allow background location permission",
-                    ""
-                )
-
-                openApplicationDetailsSettings(binding!!)
-            }
-
-//            ActivityCompat.shouldShowRequestPermissionRationale(
-//                binding!!.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-//            ) -> {
-//                // 유저가 권한 부여 요청을 명시적으로 거부했다.
-//                // 권한 허용이 필요한 이유에 대해 상세히 안내해야만 한다.
-//
-//                result.error(
-//                    "BackgroundLocationPermissionActivelyRefused",
-//                    "The user actively refused to allow background location permission",
-//                    ""
-//                )
-//
-//                openApplicationDetailsSettings(binding!!)
-//            }
-
-            else -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE] = result
-                    requestPermissions(
-                        binding!!.activity,
-                        arrayOf(
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                        ),
-                        BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                    )
-                } else {
                     result.error(
-                        "BackgroundLocationFailedNotSupportedAndroidVersion",
-                        "Android 10 or later version needed to use this function",
+                        "BackgroundLocationPermissionActivelyRefused",
+                        "The user actively refused to allow background location permission",
                         ""
                     )
+
+                    openApplicationDetailsSettings(binding!!)
+                }
+
+                //            ActivityCompat.shouldShowRequestPermissionRationale(
+                //                binding!!.activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                //            ) -> {
+                //                // 유저가 권한 부여 요청을 명시적으로 거부했다.
+                //                // 권한 허용이 필요한 이유에 대해 상세히 안내해야만 한다.
+                //
+                //                result.error(
+                //                    "BackgroundLocationPermissionActivelyRefused",
+                //                    "The user actively refused to allow background location permission",
+                //                    ""
+                //                )
+                //
+                //                openApplicationDetailsSettings(binding!!)
+                //            }
+
+                else -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE] = result
+                        requestPermissions(
+                            binding!!.activity, arrayOf(
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                            ), BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    } else {
+                        result.error(
+                            "BackgroundLocationFailedNotSupportedAndroidVersion",
+                            "Android 10 or later version needed to use this function",
+                            ""
+                        )
+                    }
                 }
             }
+        } else {
+            // 버전이 낮아서 백그라운드 권한을 따로 요청할 필요가 없겠지...?
+            // 성공한 것으로 취급한다.
+            result.success("OK")
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun checkBackgroundLocationPermission(context: Context) =
+        ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        )
 }

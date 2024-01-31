@@ -26,24 +26,6 @@ class MockRollingGeofencePlatform
   }
 
   @override
-  Function? onLocationPermissionAllowed;
-
-  @override
-  Function? onLocationPermissionDenied;
-
-  @override
-  Function? onBackgroundLocationPermissionAllowed;
-
-  @override
-  Function? onBackgroundLocationPermissionDenied;
-
-  @override
-  Function(int p1)? onError;
-
-  @override
-  Function(int p1)? onSuccess;
-
-  @override
   Future<String?> requestBackgroundLocationPermission() {
     // TODO: implement requestBackgroundLocationPermission
     throw UnimplementedError();
@@ -56,55 +38,9 @@ class MockRollingGeofencePlatform
   }
 
   @override
-  void setOnError(Function(int p1) callback) {
-    // TODO: implement setOnError
-  }
-
-  @override
-  void setOnLocationPermissionAllowed(Function callback) {
-    // TODO: implement setOnLocationPermissionAllowed
-  }
-
-  @override
-  void setOnLocationPermissionDenied(Function callback) {
-    // TODO: implement setOnLocationPermissionDenied
-  }
-
-  @override
-  void setOnSuccess(Function(int p1) callback) {
-    // TODO: implement setOnSuccess
-  }
-
-  @override
-  void setOnBackgroundLocationPermissionAllowed(Function callback) {
-    // TODO: implement setOnBackgroundLocationPermissionAllowed
-  }
-
-  @override
-  void setOnBackgroundLocationPermissionDenied(Function callback) {
-    // TODO: implement setOnBackgroundLocationPermissionDenied
-  }
-
-  @override
   Future<String?> startLocationRequest() {
     // TODO: implement startLocationRequest
     throw UnimplementedError();
-  }
-
-  @override
-  Function? onBackgroundLocationPermissionAlreadyAllowed;
-
-  @override
-  Function? onLocationPermissionAlreadyAllowed;
-
-  @override
-  void setOnBackgroundLocationPermissionAlreadyAllowed(Function callback) {
-    // TODO: implement setOnBackgroundLocationPermissionAlreadyAllowed
-  }
-
-  @override
-  void setOnLocationPermissionAlreadyAllowed(Function callback) {
-    // TODO: implement setOnLocationPermissionAlreadyAllowed
   }
 
   @override
@@ -138,6 +74,18 @@ class MockRollingGeofencePlatform
   @override
   Future<List<double>> startSingleLocationRequest() {
     // TODO: implement startSingleLocationRequest
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> checkLocationPermission() {
+    // TODO: implement checkLocationPermission
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> requestLocationSetting() {
+    // TODO: implement requestLocationSetting
     throw UnimplementedError();
   }
 }

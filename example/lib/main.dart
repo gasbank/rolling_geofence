@@ -89,6 +89,29 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _checkLocationPermission(BuildContext context) async {
+    String? checkPermissionResult;
+    try {
+      checkPermissionResult =
+          await _rollingGeofencePlugin.checkLocationPermission();
+    } on PlatformException catch (e) {
+      checkPermissionResult = e.code;
+    }
+
+    final resultMsg =
+        'Check location permission result: $checkPermissionResult';
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(resultMsg),
+      ));
+    }
+
+    if (kDebugMode) {
+      print(resultMsg);
+    }
+  }
+
   Future<void> _requestLocationPermission(BuildContext context) async {
     String? foregroundResult;
 
@@ -185,6 +208,9 @@ class _MyAppState extends State<MyApp> {
             padding: const EdgeInsets.all(16),
             children: [
               Text('Running on: $_platformVersion\n'),
+              TextButton(
+                  onPressed: () => _checkLocationPermission(context),
+                  child: const Text('현재 권한 상태 체크만 하기')),
               TextButton(
                   onPressed: () => _requestLocationPermission(context),
                   child: const Text('권한 요청!')),

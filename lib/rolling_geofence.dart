@@ -53,4 +53,8 @@ class RollingGeofence {
   void setOnDidExitRegionIos(Function(String) callback) {
     return RollingGeofencePlatform.instance.setOnDidExitRegionIos(callback);
   }
+
+  Future<String?> checkLocationPermission() {
+    return RollingGeofencePlatform.instance.checkLocationPermission();
+  }
 }

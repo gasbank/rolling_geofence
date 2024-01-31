@@ -30,7 +30,8 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
 
   @override
   Future<String?> requestLocationSetting() async {
-    final ret = await methodChannel.invokeMethod<String>('requestLocationSetting');
+    final ret =
+        await methodChannel.invokeMethod<String>('requestLocationSetting');
     return ret;
   }
 
@@ -101,6 +102,13 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   Future<String?> createGeofencingClient() async {
     final ret =
         await methodChannel.invokeMethod<String>('createGeofencingClient');
+    return ret;
+  }
+
+  @override
+  Future<String?> checkLocationPermission() async {
+    final ret =
+        await methodChannel.invokeMethod<String>('checkLocationPermission');
     return ret;
   }
 }
