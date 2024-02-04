@@ -111,4 +111,10 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
         await methodChannel.invokeMethod<String>('checkLocationPermission');
     return ret;
   }
+
+  @override
+  Future<String?> requestBatteryOptimizationPermission() async {
+    final ret = await methodChannel.invokeMethod<String>('requestBatteryOptimizationPermission');
+    return ret;
+  }
 }

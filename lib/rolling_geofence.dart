@@ -57,4 +57,8 @@ class RollingGeofence {
   Future<String?> checkLocationPermission() {
     return RollingGeofencePlatform.instance.checkLocationPermission();
   }
+
+  Future<String?> requestBatteryOptimizationPermission() {
+    return RollingGeofencePlatform.instance.requestBatteryOptimizationPermission();
+  }
 }

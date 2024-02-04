@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -168,6 +169,12 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                 } else {
                     result.success("NoForegroundLocationPermission")
+                }
+            }
+
+            "requestBatteryOptimizationPermission" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestBatteryOptimizationPermission(applicationContext!!, binding!!, result)
                 }
             }
 
@@ -580,6 +587,20 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             // 버전이 낮아서 백그라운드 권한을 따로 요청할 필요가 없겠지...?
             // 성공한 것으로 취급한다.
             result.success("OK")
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun requestBatteryOptimizationPermission(context: Context, binding: ActivityPluginBinding, result: Result) {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        if (pm.isIgnoringBatteryOptimizations(binding.activity.packageName)) {
+            result.success("Permission Already Granted")
+        } else {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            intent.data = Uri.fromParts("package", binding.activity.packageName, null)
+            intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+            startActivity(binding.activity.applicationContext, intent, null)
         }
     }
 
