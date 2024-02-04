@@ -429,8 +429,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
         // 현재 위치를 딱 한번만 조회해서 result로 반환
         val locationRequest =
-            LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
-                .setMinUpdateDistanceMeters(200.0f).setMaxUpdates(1) // 딱 한번
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 0)
+                .setMaxUpdates(1) // 딱 한번
                 .build()
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(context)
