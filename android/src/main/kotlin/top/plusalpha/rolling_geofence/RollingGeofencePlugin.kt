@@ -423,7 +423,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     // Ignore the error.
                 }
             }
-            result.error("CheckLocationSettingsFailed", null, null)
+            result.error("CheckLocationSettingsFailed", "startLocationRequest: checkLocationSettings() failed with an exception", exception)
         }
     }
 
@@ -466,8 +466,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             //result.success("OK")
         }
 
-        task.addOnFailureListener {
-            result.error("CheckLocationSettingsFailed", null, null)
+        task.addOnFailureListener { exception ->
+            result.error("CheckLocationSettingsFailed", "startSingleLocationRequest: checkLocationSettings() failed with an exception", exception)
         }
     }
 
