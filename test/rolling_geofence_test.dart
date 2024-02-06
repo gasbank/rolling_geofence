@@ -88,6 +88,42 @@ class MockRollingGeofencePlatform
     // TODO: implement requestLocationSetting
     throw UnimplementedError();
   }
+
+  @override
+  Future<bool?> checkBackgroundLocationRationale() {
+    // TODO: implement checkBackgroundLocationRationale
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> requestBatteryOptimizationPermission() {
+    // TODO: implement requestBatteryOptimizationPermission
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> checkBgPermission() {
+    // TODO: implement checkBgPermission
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> checkFgPermission() {
+    // TODO: implement checkFgPermission
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> shouldShowBgRationale() {
+    // TODO: implement shouldShowBgRationale
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> shouldShowFgRationale() {
+    // TODO: implement shouldShowFgRationale
+    throw UnimplementedError();
+  }
 }
 
 void main() {

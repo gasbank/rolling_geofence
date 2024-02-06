@@ -1,6 +1,22 @@
 import 'rolling_geofence_platform_interface.dart';
 
 class RollingGeofence {
+  Future<bool?> checkFgPermission() {
+    return RollingGeofencePlatform.instance.checkFgPermission();
+  }
+
+  Future<bool?> checkBgPermission() {
+    return RollingGeofencePlatform.instance.checkBgPermission();
+  }
+
+  Future<bool?> shouldShowFgRationale() {
+    return RollingGeofencePlatform.instance.shouldShowFgRationale();
+  }
+
+  Future<bool?> shouldShowBgRationale() {
+    return RollingGeofencePlatform.instance.shouldShowBgRationale();
+  }
+
   Future<String?> requestLocationSetting() {
     return RollingGeofencePlatform.instance.requestLocationSetting();
   }
@@ -59,6 +75,11 @@ class RollingGeofence {
   }
 
   Future<String?> requestBatteryOptimizationPermission() {
-    return RollingGeofencePlatform.instance.requestBatteryOptimizationPermission();
+    return RollingGeofencePlatform.instance
+        .requestBatteryOptimizationPermission();
+  }
+
+  Future<bool?> checkBackgroundLocationRationale() {
+    return RollingGeofencePlatform.instance.checkBackgroundLocationRationale();
   }
 }

@@ -26,6 +26,24 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   Function(String)? onDidEnterRegionIos;
   Function(String)? onDidExitRegionIos;
 
+  Future<bool?> checkFgPermission() {
+    throw UnimplementedError('checkFgPermission() has not been implemented.');
+  }
+
+  Future<bool?> checkBgPermission() {
+    throw UnimplementedError('checkBgPermission() has not been implemented.');
+  }
+
+  Future<bool?> shouldShowFgRationale() {
+    throw UnimplementedError(
+        'shouldShowFgRationale() has not been implemented.');
+  }
+
+  Future<bool?> shouldShowBgRationale() {
+    throw UnimplementedError(
+        'shouldShowBgRationale() has not been implemented.');
+  }
+
   Future<String?> requestLocationSetting() {
     throw UnimplementedError(
         'requestLocationSetting() has not been implemented.');
@@ -88,6 +106,12 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
   }
 
   Future<String?> requestBatteryOptimizationPermission() {
-    throw UnimplementedError('requestBatteryOptimizationPermission() has not been implemented');
+    throw UnimplementedError(
+        'requestBatteryOptimizationPermission() has not been implemented');
+  }
+
+  Future<bool?> checkBackgroundLocationRationale() {
+    throw UnimplementedError(
+        'checkBackgroundLocationRationale() has not been implemented');
   }
 }

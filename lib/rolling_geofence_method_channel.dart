@@ -29,6 +29,26 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   }
 
   @override
+  Future<bool?> checkFgPermission() async {
+    return await methodChannel.invokeMethod<bool>('checkFgPermission');
+  }
+
+  @override
+  Future<bool?> checkBgPermission() async {
+    return await methodChannel.invokeMethod<bool>('checkBgPermission');
+  }
+
+  @override
+  Future<bool?> shouldShowFgRationale() async {
+    return await methodChannel.invokeMethod<bool>('shouldShowFgRationale');
+  }
+
+  @override
+  Future<bool?> shouldShowBgRationale() async {
+    return await methodChannel.invokeMethod<bool>('shouldShowBgRationale');
+  }
+
+  @override
   Future<String?> requestLocationSetting() async {
     final ret =
         await methodChannel.invokeMethod<String>('requestLocationSetting');
@@ -114,7 +134,15 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
 
   @override
   Future<String?> requestBatteryOptimizationPermission() async {
-    final ret = await methodChannel.invokeMethod<String>('requestBatteryOptimizationPermission');
+    final ret = await methodChannel
+        .invokeMethod<String>('requestBatteryOptimizationPermission');
+    return ret;
+  }
+
+  @override
+  Future<bool?> checkBackgroundLocationRationale() async {
+    final ret = await methodChannel
+        .invokeMethod<bool>('checkBackgroundLocationRationale');
     return ret;
   }
 }
