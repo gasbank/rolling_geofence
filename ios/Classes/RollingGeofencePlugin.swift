@@ -16,8 +16,20 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
+        case "checkFgPermission":
+            result(locationDataManager.fgPermission)
+        case "checkBgPermission":
+            result(locationDataManager.bgPermission)
+        case "shouldShowFgRationale":
+            result(nil)
+        case "shouldShowBgRationale":
+            result(nil)
+        case "checkLocationPermission":
+            result(locationDataManager.fgPermission && locationDataManager.bgPermission ? "OK" : "Denied")
         case "requestLocationPermission":
             locationDataManager.requestPermission()
+        case "requestBackgroundLocationPermission":
+            result(FlutterError(code: "Unsupported", message: "'\(call.method)' is not supported on iOS.", details: nil))
         case "registerGeofence":
             guard let argsMap = call.arguments as? Dictionary<String, Any>,
                   let name = argsMap["name"] as? String,
@@ -26,13 +38,17 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: call.method, message: "Argument error", details: nil))
                 return
             }
+
+            locationDataManager.registerGeofence(center: CLLocationCoordinate2D(latitude: latitude,
+                                                                                longitude: longitude),
+                                                 radius: 350,
+                                                 identifier: name)
             
-            locationDataManager.monitorRegionAtLocation(center: CLLocationCoordinate2D(latitude: latitude,
-                                                                                       longitude: longitude),
-                                                        radius: 200,
-                                                        identifier: name)
-            
-            result("ok")
+            result("OK")
+        case "createGeofencingClient":
+            locationDataManager.createGeofencingClient()
+        case "startSingleLocationRequest":
+            locationDataManager.startSingleLocationRequest(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
