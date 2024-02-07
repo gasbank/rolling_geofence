@@ -61,11 +61,22 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
+    // iOS 14 미만 옛날 기기에서 작동하는 콜백
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        NSLog("RollingGeofence: locationManager didChangeAuthorization - status = \(status)")
+        
+        didChangeAuth(status: status)
+    }
+        
     @available(iOS 14.0, *)
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         NSLog("RollingGeofence: locationManagerDidChangeAuthorization - manager.authorizationStatus = \(manager.authorizationStatus)")
         
-        switch manager.authorizationStatus {
+        didChangeAuth(status: manager.authorizationStatus)
+    }
+    
+    func didChangeAuth(status: CLAuthorizationStatus) {
+        switch status {
         case .authorizedWhenInUse:
             fgPermission = true
             bgPermission = false
@@ -97,6 +108,12 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     }
     
     func requestPermission(result: @escaping FlutterResult) {
+        // 이미 권한 획득이 끝났다면
+        if fgPermission && bgPermission {
+            result("OK")
+            return
+        }
+        
         if #available(iOS 14.0, *) {
             NSLog("\nRollingGeofence: requestPermission - manager.authorizationStatus = \(locationManager.authorizationStatus)")
         } else {
