@@ -27,7 +27,7 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
         case "checkLocationPermission":
             result(locationDataManager.fgPermission && locationDataManager.bgPermission ? "OK" : "Denied")
         case "requestLocationPermission":
-            locationDataManager.requestPermission()
+            locationDataManager.requestPermission(result: result)
         case "requestBackgroundLocationPermission":
             result(FlutterError(code: "Unsupported", message: "'\(call.method)' is not supported on iOS.", details: nil))
         case "registerGeofence":
@@ -47,6 +47,7 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
             result("OK")
         case "createGeofencingClient":
             locationDataManager.createGeofencingClient()
+            result("OK")
         case "startSingleLocationRequest":
             locationDataManager.startSingleLocationRequest(result: result)
         default:

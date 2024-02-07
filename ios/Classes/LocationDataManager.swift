@@ -15,12 +15,14 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     var fgPermission: Bool = false
     var bgPermission: Bool = false
     var geofenceList: [Geofence] = []
+    var permissionResult: FlutterResult?
     var singleLocationResult: FlutterResult?
     
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        //locationManager.allowsBackgroundLocationUpdates = true
     }
     
     func setChannel(channel: FlutterMethodChannel) {
@@ -87,14 +89,26 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
         default:
             break
         }
+        
+        if permissionResult != nil {
+            permissionResult!(fgPermission && bgPermission ? "OK" : "Denied")
+            permissionResult = nil
+        }
     }
     
-    func requestPermission() {
+    func requestPermission(result: @escaping FlutterResult) {
         if #available(iOS 14.0, *) {
             NSLog("\nRollingGeofence: requestPermission - manager.authorizationStatus = \(locationManager.authorizationStatus)")
         } else {
             // Fallback on earlier versions
         }
+        
+        if permissionResult != nil {
+            result(FlutterError(code: "OverlappedRequest", message: "requestPermission was called again before the previous was not finished", details: nil))
+            return
+        }
+        permissionResult = result
+        
         locationManager.requestAlwaysAuthorization()
     }
     
@@ -104,6 +118,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             return
         }
         singleLocationResult = result
+        
         locationManager.requestLocation()
     }
     
@@ -138,6 +153,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             if channel != nil {
                 channel?.invokeMethod("onDidEnterRegionIos", arguments: ["name": identifier])
             }
+            
             //triggerTaskAssociatedWithRegionIdentifier(regionID: identifier)
         }
     }
