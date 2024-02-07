@@ -38,6 +38,8 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
                                     radius: geofence.radius,
                                     identifier: geofence.identifier)
         }
+        
+        geofenceList.removeAll()
     }
     
     // Location-related properties and delegate methods.
