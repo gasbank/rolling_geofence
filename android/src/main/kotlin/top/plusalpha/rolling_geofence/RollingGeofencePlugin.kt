@@ -679,14 +679,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 else -> {
                     // 사용자가 권한 설정을 거절했거나 잘못 설정했다.
                     // 알아서 하라고 할 수 밖에...?
-
-                    result.error(
-                        "BackgroundLocationPermissionActivelyRefused",
-                        "The user actively refused to allow background location permission",
-                        ""
-                    )
-
-                    openApplicationDetailsSettings(context)
+                    result.success("BackgroundLocationPermissionActivelyDenied")
                 }
             }
         } else {
