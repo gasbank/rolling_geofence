@@ -16,7 +16,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     var bgPermission: Bool?
     var geofenceList: [Geofence] = []
     var permissionResult: FlutterResult?
-    var singleLocationResult: FlutterResult?
+    var singleLocationResult: [FlutterResult] = []
     
     override init() {
         super.init()
@@ -139,11 +139,7 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
     }
     
     func startSingleLocationRequest(result: @escaping FlutterResult) {
-        if singleLocationResult != nil {
-            result(FlutterError(code: "OverlappedRequest", message: "startSingleLocationRequest was called again before the previous was not finished", details: nil))
-            return
-        }
-        singleLocationResult = result
+        singleLocationResult.append(result)
         
         locationManager.requestLocation()
     }
@@ -157,14 +153,21 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             doubleArrList.append(loc.coordinate.longitude)
         }
         
-        if singleLocationResult != nil {
-            singleLocationResult!(doubleArrList)
-            singleLocationResult = nil
+        for result in singleLocationResult {
+            result(doubleArrList)
         }
+        
+        singleLocationResult.removeAll()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         NSLog("Location didFailWithError: \(error)")
+        
+        for result in singleLocationResult {
+            result(FlutterError(code: "LocationQueryFailed", message: nil, details: nil))
+        }
+        
+        singleLocationResult.removeAll()
     }
     
     func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
