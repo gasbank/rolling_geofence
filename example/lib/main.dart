@@ -38,6 +38,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool? _bgPermission;
   bool? _showFgRationale;
   bool? _showBgRationale;
+  String? _isIgnoringBatteryOptimizations;
   final _plugin = RollingGeofence();
   double _mapZoom = 14;
   double _geofenceRadius = 350;
@@ -78,6 +79,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _plugin
         .shouldShowBgRationale()
         .then((value) => setState(() => _showBgRationale = value));
+    _plugin.isIgnoringBatteryOptimizations().then(
+        (value) => setState(() => _isIgnoringBatteryOptimizations = value));
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -226,11 +229,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return SafeArea(
             child: ListView(
               children: [
-                Text('Running on: $_platformVersion\n'),
-                Text('Foreground Permission: $_fgPermission\n'),
-                Text('Background Permission: $_bgPermission\n'),
-                Text('Show Foreground Rationale: $_showFgRationale\n'),
-                Text('Show Background Rationale: $_showBgRationale\n'),
+                Text('Running on: $_platformVersion'),
+                Text('Foreground Permission: $_fgPermission'),
+                Text('Background Permission: $_bgPermission'),
+                Text('Show Foreground Rationale: $_showFgRationale'),
+                Text('Show Background Rationale: $_showBgRationale'),
+                Text(
+                    'Is Ignoring Battery Optimizations: $_isIgnoringBatteryOptimizations'),
                 TextButton(
                     onPressed: () => _checkLocationPermission(context),
                     child: const Text('현재 권한 상태 체크만 하기')),
@@ -263,6 +268,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       await _plugin.openApplicationDetailsSettings();
                     },
                     child: const Text('앱 설정 열기 (Android)')),
+                TextButton(
+                    onPressed: () async {
+                      await _plugin.requestBatteryOptimizationPermission();
+                    },
+                    child: const Text('배터리 제한 없이 사용 권한 요청')),
                 SizedBox(
                   width: 500,
                   height: 500,

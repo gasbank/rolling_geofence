@@ -130,6 +130,12 @@ class MockRollingGeofencePlatform
     // TODO: implement openApplicationDetailsSettings
     throw UnimplementedError();
   }
+
+  @override
+  Future<String?> isIgnoringBatteryOptimizations() {
+    // TODO: implement isIgnoringBatteryOptimizations
+    throw UnimplementedError();
+  }
 }
 
 void main() {

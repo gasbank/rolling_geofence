@@ -220,8 +220,21 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             "requestBatteryOptimizationPermission" -> {
+                if (applicationContext == null) {
+                    result.error("ApplicationContextNull", null, null)
+                    return
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestBatteryOptimizationPermission(applicationContext!!, binding!!, result)
+                    requestBatteryOptimizationPermission(applicationContext!!, result)
+                }
+            }
+
+            "isIgnoringBatteryOptimizations" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    isIgnoringBatteryOptimizations(applicationContext!!, result)
+                } else {
+                    result.success("OK");
                 }
             }
 
@@ -237,6 +250,17 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             else -> {
                 result.notImplemented()
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun isIgnoringBatteryOptimizations(context: Context, result: MethodChannel.Result) {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        if (pm.isIgnoringBatteryOptimizations(context.packageName)) {
+            result.success("OK");
+        } else {
+            result.success("Optimized");
         }
     }
 
@@ -686,18 +710,18 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     @RequiresApi(Build.VERSION_CODES.M)
     private fun requestBatteryOptimizationPermission(
         context: Context,
-        binding: ActivityPluginBinding,
         result: Result
     ) {
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
-        if (pm.isIgnoringBatteryOptimizations(binding.activity.packageName)) {
-            result.success("Permission Already Granted")
+        if (pm.isIgnoringBatteryOptimizations(context.packageName)) {
+            result.success("OK")
         } else {
             val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            intent.data = Uri.fromParts("package", binding.activity.packageName, null)
+            intent.data = Uri.fromParts("package", context.packageName, null)
             intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-            startActivity(binding.activity.applicationContext, intent, null)
+            startActivity(context, intent, null)
+            result.success("Requested")
         }
     }
 

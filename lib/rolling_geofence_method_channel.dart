@@ -140,6 +140,13 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   }
 
   @override
+  Future<String?> isIgnoringBatteryOptimizations() async {
+    final ret = await methodChannel
+        .invokeMethod<String>('isIgnoringBatteryOptimizations');
+    return ret;
+  }
+
+  @override
   Future<bool?> checkBackgroundLocationRationale() async {
     final ret = await methodChannel
         .invokeMethod<bool>('checkBackgroundLocationRationale');

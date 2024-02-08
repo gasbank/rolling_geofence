@@ -79,6 +79,10 @@ class RollingGeofence {
         .requestBatteryOptimizationPermission();
   }
 
+  Future<String?> isIgnoringBatteryOptimizations() {
+    return RollingGeofencePlatform.instance.isIgnoringBatteryOptimizations();
+  }
+
   Future<bool?> checkBackgroundLocationRationale() {
     return RollingGeofencePlatform.instance.checkBackgroundLocationRationale();
   }

@@ -110,6 +110,11 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
         'requestBatteryOptimizationPermission() has not been implemented');
   }
 
+  Future<String?> isIgnoringBatteryOptimizations() {
+    throw UnimplementedError(
+        'isIgnoringBatteryOptimizations() has not been implemented');
+  }
+
   Future<bool?> checkBackgroundLocationRationale() {
     throw UnimplementedError(
         'checkBackgroundLocationRationale() has not been implemented');
