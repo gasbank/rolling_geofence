@@ -612,11 +612,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     resultCallbackMap[FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.success("LocationPermissionAllowed")
                 } else {
 
-                    resultCallbackMap[FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.error(
-                        "LocationPermissionDenied",
-                        "The user cancelled/denied foreground location permission",
-                        ""
-                    )
+                    resultCallbackMap[FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.success("LocationPermissionDenied")
                 }
                 resultCallbackMap.remove(FOREGROUND_LOCATION_PERMISSION_REQUEST_CODE)
             }
@@ -730,11 +726,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 when (resultCode) {
                     0 -> {
                         // 거절했다... 허어...
-                        resultCallbackMap[START_SINGLE_LOCATION_REQUEST_CODE]?.error(
-                            "WiFiPermissionRequiredForAccuracy",
-                            "User declined WiFi permission which is required for accurate location query.",
-                            null
-                        )
+                        resultCallbackMap[START_SINGLE_LOCATION_REQUEST_CODE]?.success("WiFiPermissionRequiredForAccuracyDenied")
                     }
 
                     -1 -> {
