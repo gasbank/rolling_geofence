@@ -114,4 +114,9 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
     throw UnimplementedError(
         'checkBackgroundLocationRationale() has not been implemented');
   }
+
+  Future<void> openApplicationDetailsSettings() {
+    throw UnimplementedError(
+        'openApplicationDetailsSettings() has not been implemented');
+  }
 }

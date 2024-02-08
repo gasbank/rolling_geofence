@@ -225,6 +225,15 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
 
+            "openApplicationDetailsSettings" -> {
+                if (applicationContext == null) {
+                    result.error("ApplicationContextNull", null, null)
+                    return
+                }
+                openApplicationDetailsSettings(applicationContext!!)
+                result.success("OK")
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -415,12 +424,12 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
 
     // Android OS 레벨의 앱 별 App info 페이지를 열어준다.
-    private fun openApplicationDetailsSettings(binding: ActivityPluginBinding) {
+    private fun openApplicationDetailsSettings(context: Context) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        val uri = Uri.fromParts("package", binding.activity.packageName, null)
+        val uri = Uri.fromParts("package", context.packageName, null)
         intent.data = uri
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-        startActivity(binding.activity.applicationContext, intent, null)
+        startActivity(context, intent, null)
     }
 
     private fun createGeofencingClient(context: Context, result: Result) {
@@ -653,7 +662,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         ""
                     )
 
-                    openApplicationDetailsSettings(binding!!)
+                    openApplicationDetailsSettings(context)
                 }
             }
         } else {

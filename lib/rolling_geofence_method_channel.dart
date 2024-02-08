@@ -145,4 +145,11 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
         .invokeMethod<bool>('checkBackgroundLocationRationale');
     return ret;
   }
+
+  @override
+  Future<void> openApplicationDetailsSettings() async {
+    final ret = await methodChannel
+        .invokeMethod<void>('openApplicationDetailsSettings');
+    return ret;
+  }
 }

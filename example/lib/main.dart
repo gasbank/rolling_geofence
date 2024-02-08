@@ -258,6 +258,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       }
                     },
                     child: const Text('현재 좌표 조회')),
+                TextButton(
+                    onPressed: () async {
+                      await _plugin.openApplicationDetailsSettings();
+                    },
+                    child: const Text('앱 설정 열기 (Android)')),
                 SizedBox(
                   width: 500,
                   height: 500,

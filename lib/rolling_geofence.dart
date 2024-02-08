@@ -82,4 +82,8 @@ class RollingGeofence {
   Future<bool?> checkBackgroundLocationRationale() {
     return RollingGeofencePlatform.instance.checkBackgroundLocationRationale();
   }
+
+  Future<void> openApplicationDetailsSettings() {
+    return RollingGeofencePlatform.instance.openApplicationDetailsSettings();
+  }
 }

@@ -124,6 +124,12 @@ class MockRollingGeofencePlatform
     // TODO: implement shouldShowFgRationale
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> openApplicationDetailsSettings() {
+    // TODO: implement openApplicationDetailsSettings
+    throw UnimplementedError();
+  }
 }
 
 void main() {
