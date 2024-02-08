@@ -627,11 +627,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.success("BackgroundLocationPermissionAllowed")
                 } else {
 
-                    resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.error(
-                        "BackgroundLocationPermissionDenied",
-                        "The user cancelled/denied background foreground location permission",
-                        ""
-                    )
+                    resultCallbackMap[BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE]?.success("BackgroundLocationPermissionDenied")
                 }
 
                 resultCallbackMap.remove(BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE)
