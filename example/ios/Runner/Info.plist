@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>NSLocationAlwaysAndWhenInUseUsageDescription</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>NSLocationWhenInUseUsageDescription</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -32,6 +28,10 @@
 	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>화면이 꺼진 상태에서도 스치는 인연을 찾기 위해서는 백그라운드에서도 위치 정보가 필요합니다.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>스치는 인연을 찾기 위해서는 사용자의 위치 정보가 필요합니다.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

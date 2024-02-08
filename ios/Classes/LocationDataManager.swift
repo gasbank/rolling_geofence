@@ -12,8 +12,8 @@ struct Geofence {
 class LocationDataManager : NSObject, CLLocationManagerDelegate {
     var locationManager = CLLocationManager()
     var channel: FlutterMethodChannel?
-    var fgPermission: Bool = false
-    var bgPermission: Bool = false
+    var fgPermission: Bool?
+    var bgPermission: Bool?
     var geofenceList: [Geofence] = []
     var permissionResult: FlutterResult?
     var singleLocationResult: FlutterResult?
@@ -75,6 +75,13 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
         didChangeAuth(status: manager.authorizationStatus)
     }
     
+    fileprivate func callPermissionResult() {
+        if permissionResult != nil {
+            permissionResult!(fgPermission == true && bgPermission == true ? "OK" : "Denied")
+            permissionResult = nil
+        }
+    }
+    
     func didChangeAuth(status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse:
@@ -88,8 +95,8 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             break
             
         case .notDetermined:
-            fgPermission = false
-            bgPermission = false
+            fgPermission = nil
+            bgPermission = nil
             break
             
         case .authorizedAlways:
@@ -101,15 +108,12 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             break
         }
         
-        if permissionResult != nil {
-            permissionResult!(fgPermission && bgPermission ? "OK" : "Denied")
-            permissionResult = nil
-        }
+        callPermissionResult()
     }
     
     func requestPermission(result: @escaping FlutterResult) {
         // 이미 권한 획득이 끝났다면
-        if fgPermission && bgPermission {
+        if fgPermission == true && bgPermission == true {
             result("OK")
             return
         }
@@ -125,6 +129,11 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             return
         }
         permissionResult = result
+        
+        if (fgPermission != nil && bgPermission != nil) {
+            callPermissionResult()
+            return
+        }
         
         locationManager.requestAlwaysAuthorization()
     }
@@ -185,6 +194,12 @@ class LocationDataManager : NSObject, CLLocationManagerDelegate {
             }
             
             //triggerTaskAssociatedWithRegionIdentifier(regionID: identifier)
+        }
+    }
+    
+    func openApplicationDetailsSettings() {
+        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(appSettings, options: [:], completionHandler: nil)
         }
     }
 }

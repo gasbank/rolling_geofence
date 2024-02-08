@@ -25,7 +25,7 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
         case "shouldShowBgRationale":
             result(nil)
         case "checkLocationPermission":
-            result(locationDataManager.fgPermission && locationDataManager.bgPermission ? "OK" : "Denied")
+            result(locationDataManager.fgPermission == true && locationDataManager.bgPermission == true ? "OK" : "Denied")
         case "requestLocationPermission":
             locationDataManager.requestPermission(result: result)
         case "requestBackgroundLocationPermission":
@@ -50,6 +50,11 @@ public class RollingGeofencePlugin: NSObject, FlutterPlugin {
             result("OK")
         case "startSingleLocationRequest":
             locationDataManager.startSingleLocationRequest(result: result)
+        case "openApplicationDetailsSettings":
+            locationDataManager.openApplicationDetailsSettings()
+            result("OK")
+        case "isIgnoringBatteryOptimizations":
+            result("OK")
         default:
             result(FlutterMethodNotImplemented)
         }
