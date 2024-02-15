@@ -33,11 +33,6 @@
         </activity>
 
         <receiver android:name="top.plusalpha.rolling_geofence.GeofenceBroadcastReceiver"/>
-        <service
-            android:name="top.plusalpha.rolling_geofence.GeofenceForegroundService"
-            android:foregroundServiceType="location"
-            android:exported="false">
-        </service>
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
