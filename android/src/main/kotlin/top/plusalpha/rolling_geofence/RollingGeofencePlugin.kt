@@ -331,7 +331,9 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         // geofenceList가 비어 있으면 GeofencingRequest 만들지 못하고 예외 발생하니 주의
 
         return GeofencingRequest.Builder().apply {
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            // 지오펜스가 추가될 때 ENTER 이벤트 트리거할지 말지인데,
+            // iOS는 이런 기능이 없다... Android도 쓰지 말자.
+            //setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             addGeofences(geofenceList)
         }.build()
     }
