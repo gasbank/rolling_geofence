@@ -18,7 +18,6 @@ void onGeofenceEvent(List<String> args) async {
 
   final rollingGeofencePlugin = RollingGeofence();
   await rollingGeofencePlugin.createGeofencingClient();
-  await rollingGeofencePlugin.updateGeofence();
 }
 
 void main() {

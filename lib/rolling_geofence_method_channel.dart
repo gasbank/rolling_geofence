@@ -22,11 +22,6 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
             onDidExitRegionIos!(call.arguments["name"]);
           }
           break;
-        case "onGeofenceEventWhileForegrounded":
-          if (onGeofenceEventWhileForegrounded != null) {
-            onGeofenceEventWhileForegrounded!(call.arguments);
-          }
-          break;
       }
 
       return SynchronousFuture(null);
@@ -111,16 +106,6 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
       'longitude': longitude,
     });
     return ret;
-  }
-
-  @override
-  Future<String?> updateGeofence() async {
-    await methodChannel.invokeMethod('updateGeofence');
-  }
-
-  @override
-  Future<String?> clearGeofence() async {
-    await methodChannel.invokeMethod('clearGeofence');
   }
 
   @override

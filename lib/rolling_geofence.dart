@@ -50,14 +50,6 @@ class RollingGeofence {
         .registerGeofence(name: name, latitude: latitude, longitude: longitude);
   }
 
-  Future<String?> updateGeofence() {
-    return RollingGeofencePlatform.instance.updateGeofence();
-  }
-
-  Future<String?> clearGeofence() {
-    return RollingGeofencePlatform.instance.clearGeofence();
-  }
-
   Future<String?> createGeofencingClient() {
     return RollingGeofencePlatform.instance.createGeofencingClient();
   }
@@ -68,11 +60,6 @@ class RollingGeofence {
 
   void setOnDidExitRegionIos(Function(String) callback) {
     return RollingGeofencePlatform.instance.setOnDidExitRegionIos(callback);
-  }
-
-  void setOnGeofenceEventWhileForegrounded(Function(List<String>) callback) {
-    return RollingGeofencePlatform.instance
-        .setOnGeofenceEventWhileForegrounded(callback);
   }
 
   Future<String?> checkLocationPermission() {

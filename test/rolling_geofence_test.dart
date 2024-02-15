@@ -66,12 +66,6 @@ class MockRollingGeofencePlatform
   }
 
   @override
-  Future<String?> updateGeofence() {
-    // TODO: implement updateGeofence
-    throw UnimplementedError();
-  }
-
-  @override
   Future<List<double>> startSingleLocationRequest() {
     // TODO: implement startSingleLocationRequest
     throw UnimplementedError();
@@ -135,14 +129,6 @@ class MockRollingGeofencePlatform
   Future<String?> isIgnoringBatteryOptimizations() {
     // TODO: implement isIgnoringBatteryOptimizations
     throw UnimplementedError();
-  }
-
-  @override
-  Function(List<String> p1)? onGeofenceEventWhileForegrounded;
-
-  @override
-  void setOnGeofenceEventWhileForegrounded(Function(List<String> p1) callback) {
-    // TODO: implement setOnGeofenceEventWhileForegrounded
   }
 }
 

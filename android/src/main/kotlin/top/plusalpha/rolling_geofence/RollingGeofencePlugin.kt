@@ -140,7 +140,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
             // 지오펜스 하나를 새로 등록 "예약"한다.
             // 여러 개의 지오펜스를 모아 등록하기 위해 예약하는 것이다.
-            // 예약된 지오펜스를 모두 등록하기 위해서는 "updateGeofence" 메소드 호출이 필요하다.
+            // 예약된 지오펜스를 모두 등록하기 위해서는 "createGeofencingClient" 메소드 호출이 필요하다.
             "registerGeofence" -> {
                 if (call.argument<String>("name") == null || call.argument<Double>("latitude") == null || call.argument<Double>(
                         "longitude"
@@ -156,18 +156,10 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success("OK")
             }
 
-            // "registerGeofence"로 예약한 지오펜스를 실제로 등록한다.
-            "updateGeofence" -> {
-                updateGeofence()
-            }
-
-            // "registerGeofence"로 예약한 지오펜스를 모두 지우고, 실제로 등록된 내역 역시 모두 삭제한다.
-            "clearGeofence" -> {
-                clearGeofence()
-            }
-
             // 지오펜싱 클라이언트를 생성한다.
-            // 생성 직후 "registerGeofence"로 예약한 모든 지오펜스를 실제로 등록하고, 예약 내역은 삭제된다.
+            // 생성 직후 기존에 등록된 모든 지오펜스는 삭제되고,
+            // "registerGeofence"로 예약한 모든 지오펜스를 실제로 등록한다.
+            // 실제로 등록된 후 예약된 지오펜스 항목은 삭제된다.
             "createGeofencingClient" -> {
                 if (applicationContext == null) {
                     result.error("ApplicationContextNull", null, null)
@@ -234,7 +226,7 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     isIgnoringBatteryOptimizations(applicationContext!!, result)
                 } else {
-                    result.success("OK");
+                    result.success("OK")
                 }
             }
 
@@ -254,13 +246,13 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun isIgnoringBatteryOptimizations(context: Context, result: MethodChannel.Result) {
+    private fun isIgnoringBatteryOptimizations(context: Context, result: Result) {
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
         if (pm.isIgnoringBatteryOptimizations(context.packageName)) {
-            result.success("OK");
+            result.success("OK")
         } else {
-            result.success("Optimized");
+            result.success("Optimized")
         }
     }
 
@@ -293,38 +285,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         )
 
 
-    }
-
-    private fun updateGeofence() {
-        if (geofencingClient == null) {
-            Log.e(LOG_TAG, "Geofencing client is not ready")
-            return
-        }
-
-        if (geofenceList.isNotEmpty()) {
-            geofencingClient!!.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
-                addOnSuccessListener {
-                    // Geofences added
-                    // ...
-                    Log.d(LOG_TAG, "Add $it")
-                }
-                addOnFailureListener {
-                    // Failed to add geofences
-                    Log.d(LOG_TAG, "Add FAILED!!! $it")
-                }
-            }
-        }
-    }
-
-    private fun clearGeofence() {
-        geofenceList.clear()
-
-        if (geofencingClient == null) {
-            Log.e(LOG_TAG, "Geofencing client is not ready")
-            return
-        }
-
-        geofencingClient!!.removeGeofences(geofencePendingIntent)
     }
 
     private fun getGeofencingRequest(): GeofencingRequest {
