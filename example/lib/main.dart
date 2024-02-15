@@ -107,17 +107,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
     });
 
-    await _plugin.registerGeofence(
-        name: 'home', latitude: 37.5217, longitude: 126.9344);
-    await _plugin.registerGeofence(
-        name: 'office1', latitude: 37.5275, longitude: 126.9165);
-    await _plugin.registerGeofence(
-        name: 'office2', latitude: 37.4955, longitude: 126.8437);
-    await _plugin.registerGeofence(
-        name: 'yoidostation', latitude: 37.5216, longitude: 126.9241);
-    await _plugin.registerGeofence(
-        name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
-
     if (!mounted) {
       return;
     }
@@ -366,6 +355,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _createGeofencingClient(BuildContext context) async {
     String? result;
     try {
+      await _plugin.registerGeofence(
+          name: 'home', latitude: 37.5217, longitude: 126.9344);
+      await _plugin.registerGeofence(
+          name: 'office1', latitude: 37.5275, longitude: 126.9165);
+      await _plugin.registerGeofence(
+          name: 'office2', latitude: 37.4955, longitude: 126.8437);
+      await _plugin.registerGeofence(
+          name: 'yoidostation', latitude: 37.5216, longitude: 126.9241);
+      await _plugin.registerGeofence(
+          name: 'penthouse', latitude: 37.5175, longitude: 126.9319);
+
       result = await _plugin.createGeofencingClient();
     } on PlatformException catch (e) {
       result = e.code;
