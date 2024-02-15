@@ -70,6 +70,11 @@ class RollingGeofence {
     return RollingGeofencePlatform.instance.setOnDidExitRegionIos(callback);
   }
 
+  void setOnGeofenceEventWhileForegrounded(Function(List<String>) callback) {
+    return RollingGeofencePlatform.instance
+        .setOnGeofenceEventWhileForegrounded(callback);
+  }
+
   Future<String?> checkLocationPermission() {
     return RollingGeofencePlatform.instance.checkLocationPermission();
   }

@@ -25,6 +25,7 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
 
   Function(String)? onDidEnterRegionIos;
   Function(String)? onDidExitRegionIos;
+  Function(List<String>)? onGeofenceEventWhileForegrounded;
 
   Future<bool?> checkFgPermission() {
     throw UnimplementedError('checkFgPermission() has not been implemented.');
@@ -98,6 +99,10 @@ abstract class RollingGeofencePlatform extends PlatformInterface {
 
   void setOnDidExitRegionIos(Function(String) callback) {
     onDidExitRegionIos = callback;
+  }
+
+  void setOnGeofenceEventWhileForegrounded(Function(List<String>) callback) {
+    onGeofenceEventWhileForegrounded = callback;
   }
 
   Future<String?> checkLocationPermission() {

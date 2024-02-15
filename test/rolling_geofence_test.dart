@@ -136,6 +136,14 @@ class MockRollingGeofencePlatform
     // TODO: implement isIgnoringBatteryOptimizations
     throw UnimplementedError();
   }
+
+  @override
+  Function(List<String> p1)? onGeofenceEventWhileForegrounded;
+
+  @override
+  void setOnGeofenceEventWhileForegrounded(Function(List<String> p1) callback) {
+    // TODO: implement setOnGeofenceEventWhileForegrounded
+  }
 }
 
 void main() {

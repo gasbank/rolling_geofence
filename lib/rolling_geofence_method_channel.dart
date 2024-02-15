@@ -22,6 +22,11 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
             onDidExitRegionIos!(call.arguments["name"]);
           }
           break;
+        case "onGeofenceEventWhileForegrounded":
+          if (onGeofenceEventWhileForegrounded != null) {
+            onGeofenceEventWhileForegrounded!(call.arguments);
+          }
+          break;
       }
 
       return SynchronousFuture(null);
