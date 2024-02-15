@@ -8,6 +8,19 @@ import 'package:latlong2/latlong.dart';
 import 'package:rolling_geofence/rolling_geofence.dart';
 import 'package:sphere_uniform_geocoding/sphere_uniform_geocoding.dart';
 
+@pragma('vm:entry-point')
+void onGeofenceEvent(List<String> args) async {
+  if (kDebugMode) {
+    print('onGeofenceEvent: $args');
+  }
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final rollingGeofencePlugin = RollingGeofence();
+  await rollingGeofencePlugin.createGeofencingClient();
+  await rollingGeofencePlugin.updateGeofence();
+}
+
 void main() {
   runApp(const MyApp());
 }
