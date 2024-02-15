@@ -9,6 +9,7 @@ import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.plugin.common.MethodChannel
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -58,12 +59,18 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             val args = mutableListOf(geofenceTransitionStr)
             args.addAll(requestIdList)
 
+            // 앱이 실행중인 상태가 아닐 때에도 처리는 해야한다.
+            // isolate 사용해서 핸들러 호출한다.
             engine.dartExecutor.executeDartEntrypoint(
                 DartExecutor.DartEntrypoint(
                     "lib/main.dart",
                     "onGeofenceEvent"
                 ), args
             )
+
+            // 물론 앱이 포그라운드에서 실행 중인 상태일 수도 있다.
+            // 그때에도 이벤트를 바로 받아 처리할 수 있도록 추가로 콜백을 더 호출해준다.
+            MethodChannel(engine.dartExecutor.binaryMessenger, "rolling_geofence").invokeMethod("onGeofenceEventWhileForegrounded", args)
         } else {
             // Log the error.
             Log.e(LOG_TAG, "unknown transition event")
