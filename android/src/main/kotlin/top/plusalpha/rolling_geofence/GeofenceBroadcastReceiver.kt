@@ -60,7 +60,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
             engine.dartExecutor.executeDartEntrypoint(
                 DartExecutor.DartEntrypoint(
-                    "lib/main.dart",
+                    "lib/geofence_event_handler.dart",
                     "onGeofenceEvent"
                 ), args
             )
