@@ -674,6 +674,9 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         Log.i(LOG_TAG, "onActivityResult: request code=$requestCode, resultCode=$resultCode")
+
+        if (data == null || data.data == null) return true;
+
         when (requestCode) {
             LOCATION_SETTING_REQUEST_CODE -> {
                 Log.i(LOG_TAG, "LOCATION_SETTING_REQUEST_CODE result received.")
