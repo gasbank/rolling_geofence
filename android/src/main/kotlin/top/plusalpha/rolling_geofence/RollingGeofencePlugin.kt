@@ -675,8 +675,6 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         Log.i(LOG_TAG, "onActivityResult: request code=$requestCode, resultCode=$resultCode")
 
-        if (data == null || data.data == null) return true;
-
         when (requestCode) {
             LOCATION_SETTING_REQUEST_CODE -> {
                 Log.i(LOG_TAG, "LOCATION_SETTING_REQUEST_CODE result received.")
@@ -686,6 +684,8 @@ class RollingGeofencePlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 // HIGH_ACCURACY로 위치 정보 조회 시 WiFi를 써야만 한다.
                 // 그런데 WiFi를 쓸 수 없도록 설정되어 있다면 쓸 수 있도록 유저에게 요청 팝업이 뜬다.
                 // 팝업에서 어떻게 응답했느냐에 따라 resultCode가 다르다.
+                if (resultCallbackMap[START_SINGLE_LOCATION_REQUEST_CODE] == null) return true
+
                 Log.i(LOG_TAG, "START_SINGLE_LOCATION_REQUEST_CODE result received.")
 
                 when (resultCode) {
