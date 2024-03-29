@@ -86,7 +86,7 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
     final ret = await methodChannel.invokeMethod('startSingleLocationRequest');
 
     final result = switch (ret.runtimeType) {
-      const (List<double>) => List<double>.from(ret),
+      const (List<Object?>) => List<double>.from(ret),
       _ => List<double>.from([]),
     };
 
