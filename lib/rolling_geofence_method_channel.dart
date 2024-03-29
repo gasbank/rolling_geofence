@@ -85,14 +85,12 @@ class MethodChannelRollingGeofence extends RollingGeofencePlatform {
   Future<List<double>> startSingleLocationRequest() async {
     final ret = await methodChannel.invokeMethod('startSingleLocationRequest');
 
-    if (ret is String) {
-      if (kDebugMode) {
-        print(ret);
-      }
-      return List<double>.from([]);
-    }
+    final result = switch (ret.runtimeType) {
+      const (List<double>) => List<double>.from(ret),
+      _ => List<double>.from([]),
+    };
 
-    return List<double>.from(ret ?? []);
+    return result;
   }
 
   @override
